@@ -12,40 +12,46 @@
     <link rel="icon" href="images/Picture1.png" type="image/x-icon">
     <link rel="stylesheet" href="css/dark-mode.css">
     <style>
-        /* Add styling directly for demonstration purposes */
         .skills-container {
             display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-            justify-content: space-between;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             margin: 0 auto;
             max-width: 1200px;
+            padding: 2rem;
+            gap: 20px;
         }
 
-        .skills-text {
-            flex: 1;
-            margin-right: 20px;
-            margin-left: 10px;
-            text-align: left;
+        .skills-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
         }
 
         .skills-list {
-            flex: 1;
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
             gap: 20px;
-            margin-top: 0;
-            flex-wrap: wrap;
         }
 
-        .skills-list ul {
-            list-style-type: none;
-            padding: 0;
+        .skill-blob {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 20px 40px;
+            border-radius: 20px;
+            font-size: 1.5rem;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s ease, background-color 0.3s ease;
         }
 
-        .skills-list li {
-            margin-bottom: 10px;
-            font-size: 1.2rem;
+        .skill-blob:hover {
+            transform: scale(1.1);
+            background-color: rgba(200, 15, 15, 0.404);
         }
 
         body {
@@ -88,7 +94,7 @@
                 <li><a href="education.html">Education</a></li>
                 <li><a href="skills.html" class="active">Skills</a></li>
                 <li><a href="projects.html">Projects</a></li>
-                <li><a href="contact.html">Contact</a></li>
+                <li><a href="resume.pdf" download>Resume</a></li>
             </ul>
             <div class="theme-switch-wrapper">
                 <label class="theme-switch" for="theme-toggle">
@@ -102,20 +108,22 @@
     <main>
         <section id="skills">
             <div class="skills-container fade-in-element">
-                <div class="skills-text">
-                    <h1 class="header-text">My Skills</h1>
-                    <p>Here's a list of skills and tools I am proficient in:</p>
-                </div>
+                <h1 class="skills-title">Skills</h1>
                 <div class="skills-list">
-                    <ul>
-                        <li><strong>Programming Languages:</strong> HTML, CSS, JavaScript, Python, C, C++, Java</li>
-                        <li><strong>Web Development:</strong> React, Node.js, Express, REST APIs, Bootstrap</li>
-                        <li><strong>Database Technologies:</strong> MySQL, MongoDB</li>
-                        <li><strong>Software Engineering:</strong> Git, Agile Methodology, TDD</li>
-                        <li><strong>Machine Learning:</strong> Basics of TensorFlow, Scikit-learn, and Data Science
-                            concepts</li>
-                        <li><strong>Tools:</strong> Visual Studio Code, GitHub, npm, Docker</li>
-                    </ul>
+                    <div class="skill-blob">MATLAB</div>
+                    <div class="skill-blob">NumPy SciPy</div>
+                    <div class="skill-blob">C</div>
+                    <div class="skill-blob">C++</div>
+                    <div class="skill-blob">iVerilog</div>
+                    <div class="skill-blob">NGSpice</div>
+                    <div class="skill-blob">MAGIC Layout</div>
+                    <div class="skill-blob">LTSpice</div>
+                    <div class="skill-blob">Xilinx</div>
+                    <div class="skill-blob">Git</div>
+                    <div class="skill-blob">LaTeX</div>
+                    <div class="skill-blob">Electronic Sensors</div>
+                    <div class="skill-blob">VLSI Design</div>
+                    <div class="skill-blob">Arduino</div>
                 </div>
             </div>
         </section>
@@ -123,12 +131,15 @@
 
     <footer>
         <div class="social-links">
-            <a href="https://github.com/GroanKing05" target="_blank" class="social-link"><i class="fab fa-github"></i></a>
-            <a href="https://www.linkedin.com/in/varun-shastry05" target="_blank" class="social-link"><i class="fab fa-linkedin"></i></a>
+            <a href="https://github.com/GroanKing05" target="_blank" class="social-link"><i
+                    class="fab fa-github"></i></a>
+            <a href="https://www.linkedin.com/in/varun-shastry05" target="_blank" class="social-link"><i
+                    class="fab fa-linkedin"></i></a>
             <a href="mailto:varun.shastry@research.iiit.ac.in" class="social-link"><i class="fas fa-envelope"></i></a>
-            <a href="https://www.instagram.com/varuns.05/" target="_blank" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.instagram.com/varuns.05/" target="_blank" class="social-link"><i
+                    class="fab fa-instagram"></i></a>
         </div>
-        <p class="footer-text">&copy; 2024 My Profile. All rights reserved.</p>
+        <p class="footer-text">&copy; 2024 Varun Shastry. All rights reserved.</p>
     </footer>
 
     <script src="js/script.js"></script>

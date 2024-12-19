@@ -367,6 +367,33 @@ body.dark-mode .about-images img {
 }
 
 /* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .skills-container, .projects-container, .about-container, .education-container {
+        max-width: 100%;
+        padding: 1rem;
+    }
+
+    .skills-list, .projects-list, .about-images, .education-items {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .skill-blob, .project-item, .about-text, .education-item {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .hero-content, .hero-image {
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .hero-image img {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
 @media (max-width: 768px) {
     .about-container {
         flex-direction: column;
@@ -378,6 +405,64 @@ body.dark-mode .about-images img {
 
     .about-images img {
         width: 100%;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .nav-links li {
+        margin-left: 0;
+        margin-bottom: 1rem;
+    }
+
+    .hero-content, .hero-image {
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .hero-image img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .about-text, .education-content {
+        margin-right: 0;
+        margin-left: 0;
+        text-align: center;
+    }
+
+    .about-images, .education-image {
+        justify-content: center;
+    }
+
+    .about-images img, .education-image img {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .skills-title, .projects-title, .header-text {
+        font-size: 1.5rem;
+    }
+
+    .skill-blob, .project-item, .about-text, .education-item {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+
+    .hero-content p {
+        font-size: 1rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
     }
 }
 
