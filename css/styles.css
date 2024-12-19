@@ -1,0 +1,1003 @@
+/* Reset default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'SF Pro Display', sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Navigation */
+nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ff4757;
+    margin-right: auto;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    margin: 0 auto;
+    transform: translateX(-10px);
+}
+
+.nav-links li {
+    margin-left: 2rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: #ff4757;
+}
+
+/* Hero Section */
+#hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+    background-color: #f8f8f8;
+}
+
+.hero-content {
+    max-width: 50%;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #000;
+}
+
+body.dark-mode .hero-content h1 {
+    color: #fff;
+}
+
+.highlight {
+    color: #ff4757;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    color: #555;
+}
+
+.btn {
+    display: inline-block;
+    background-color: #ff4757;
+    color: #fff;
+    padding: 0.8rem 1.5rem;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #ff4757;
+}
+
+.hero-image {
+    max-width: 40%;
+}
+
+.hero-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 50%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Sections */
+section {
+    padding: 4rem 2rem;
+}
+
+section h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: #4ecdc4;
+}
+
+/* Footer */
+footer {
+    background-color: #292929;
+    color: #fff;
+    padding: 2rem;
+    text-align: center;
+}
+
+.social-links {
+    margin-bottom: 1rem;
+}
+
+.social-links a {
+    color: #fff;
+    font-size: 1.5rem;
+    margin: 0 1rem;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.social-links a:hover .fa-github {
+    color: #4078c0;
+    transform: scale(1.2);
+}
+
+.social-links a:hover .fa-linkedin {
+    color: #0077B5;
+    transform: scale(1.2);
+}
+
+.social-links a:hover .fa-envelope {
+    color: #D44638;
+    transform: scale(1.2);
+}
+
+.social-links a:hover .fa-instagram {
+    color: #E1306C;
+    transform: scale(1.2);
+}
+
+/* Theme Switch */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: #ff4757;
+}
+
+input:checked+.slider:before {
+    transform: translateX(26px);
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #121212;
+    color: #fff;
+}
+
+.dark-mode nav {
+    background-color: #1f1f1f;
+    box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .logo,
+.dark-mode .nav-links a {
+    color: #fff;
+}
+
+.dark-mode .nav-links a:hover {
+    color: #ff4757;
+}
+
+.dark-mode #hero {
+    background-color: #1f1f1f;
+}
+
+.dark-mode .hero-content p {
+    color: #ccc;
+}
+
+.dark-mode .btn {
+    background-color: #ff4757;
+    color: #fff;
+}
+
+.dark-mode .btn:hover {
+    background-color: #ff4757;
+}
+
+.dark-mode .hero-image img {
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode section h2 {
+    color: #4ecdc4;
+}
+
+.dark-mode footer {
+    background-color: #1f1f1f;
+}
+
+/* About Section */
+.about-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 2rem;
+}
+
+.about-text {
+    flex: 1;
+    min-width: 300px;
+    margin-right: 2rem;
+}
+
+.about-text h1 {
+    margin-bottom: 2rem;
+}
+
+.about-text .header-text {
+    color: #ff4757;
+}
+
+.about-text p {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+}
+
+.about-images {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    position: relative;
+}
+
+.about-images img {
+    width: calc(50% - 10px);
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+.about-images img:hover {
+    transform: scale(1.2);
+    z-index: 2;
+}
+
+.about-images img:not(:hover) {
+    opacity: 0.5;
+}
+
+.image-description {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    color: #333;
+    font-weight: bold;
+    text-align: center;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 3;
+}
+
+/* Dark mode specific styles for about page */
+body.dark-mode .image-description {
+    color: #fff;
+}
+
+body.dark-mode #about {
+    background-color: #121212;
+}
+
+body.dark-mode .about-text p {
+    color: #fff;
+}
+
+body.dark-mode .about-text h1,
+body.dark-mode .about-text .header-text {
+    color: #ff4757;
+}
+
+body.dark-mode .about-images img {
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .about-container {
+        flex-direction: column;
+    }
+
+    .about-images {
+        justify-content: center;
+    }
+
+    .about-images img {
+        width: 100%;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    0% {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+[data-animate] {
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+[data-animate].active {
+    opacity: 1;
+}
+
+[data-animate="fadeIn"] {
+    animation: fadeIn 0.8s ease-out;
+}
+
+[data-animate="fadeInUp"] {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+[data-animate="fadeInLeft"] {
+    animation: fadeInLeft 0.8s ease-out;
+}
+
+[data-animate="fadeInRight"] {
+    animation: fadeInRight 0.8s ease-out;
+}
+
+/* Reset default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'SF Pro Display', sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Navigation */
+nav {
+    display: flex;
+    justify-content: center;
+    /* Changed from space-between to center */
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ff4757;
+    margin-right: auto;
+    /* Align logo to the left */
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    margin: 0 auto;
+    /* Center navigation links */
+    transform: translateX(-10px);
+    /* Shift navigation links slightly to the left */
+}
+
+.nav-links li {
+    margin-left: 2rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: #ff4757;
+}
+
+/* Hero Section */
+#hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+    background-color: #f8f8f8;
+}
+
+.hero-content {
+    max-width: 50%;
+}
+
+/* Default light mode styles */
+.hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #000;
+    /* Black color for light mode */
+}
+
+body.dark-mode .hero-content h1 {
+    color: #fff;
+    /* White color for dark mode */
+}
+
+.highlight {
+    color: #ff4757;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    color: #555;
+}
+
+.btn {
+    display: inline-block;
+    background-color: #ff4757;
+    color: #fff;
+    padding: 0.8rem 1.5rem;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #ff4757;
+}
+
+.hero-image {
+    max-width: 40%;
+}
+
+.hero-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 50%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Sections */
+section {
+    padding: 4rem 2rem;
+}
+
+section h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: #4ecdc4;
+}
+
+/* Footer */
+footer {
+    background-color: #292929;
+    color: #fff;
+    padding: 2rem;
+    text-align: center;
+}
+
+.social-links {
+    margin-bottom: 1rem;
+}
+
+.social-links a {
+    color: #fff;
+    font-size: 1.5rem;
+    margin: 0 1rem;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.social-links a:hover .fa-github {
+    color: #4078c0;
+    /* GitHub color */
+    transform: scale(1.2);
+}
+
+.social-links a:hover .fa-linkedin {
+    color: #0077B5;
+    /* LinkedIn color */
+    transform: scale(1.2);
+}
+
+social-links a:hover .fa-envelope {
+    color: #D44638;
+    /* Email color */
+    transform: scale(1.2);
+}
+
+.social-links a:hover .fa-instagram {
+    color: #E1306C;
+    /* Instagram color */
+    transform: scale(1.2);
+}
+
+.social-links a:hover {
+    /* Remove or adjust this general hover effect if it's causing conflicts */
+    /* color: #ff4757; */
+}
+
+/* Theme Switch */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    /* Align theme switch to the right */
+}
+
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: #ff4757;
+}
+
+input:checked+.slider:before {
+    transform: translateX(26px);
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #121212;
+    color: #fff;
+}
+
+.dark-mode nav {
+    background-color: #1f1f1f;
+    box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .logo,
+.dark-mode .nav-links a {
+    color: #fff;
+}
+
+.dark-mode .nav-links a:hover {
+    color: #ff4757;
+}
+
+.dark-mode #hero {
+    background-color: #1f1f1f;
+}
+
+/* If using a custom theme switcher */
+body.dark-mode .hero-content h1 {
+    color: #fff;
+    /* White color for dark mode */
+}
+
+.dark-mode .hero-content p {
+    color: #ccc;
+}
+
+.dark-mode .btn {
+    background-color: #ff4757;
+    color: #fff;
+}
+
+.dark-mode .btn:hover {
+    background-color: #ff4757;
+}
+
+.dark-mode .hero-image img {
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode section h2 {
+    color: #4ecdc4;
+}
+
+.dark-mode footer {
+    background-color: #1f1f1f;
+}
+
+/* Education Page */
+#education {
+    padding-top: 8rem;
+    overflow: hidden;
+}
+
+.education-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.education-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10rem;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.education-item.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.education-content {
+    flex: 1;
+    margin-right: 2rem;
+}
+
+.education-header {
+    margin-bottom: 1rem;
+}
+
+.education-header h3 {
+    font-size: 2rem;
+    color: #333;
+}
+
+.education-years {
+    font-size: 1.5rem;
+    color: #777;
+}
+
+.education-details p {
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.education-image {
+    flex: 1;
+    text-align: right;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
+}
+
+.education-item.active .education-image {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.education-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Change color of college/school name in dark mode */
+body.dark-mode .education-header h3 {
+    color: #ff4757;
+}
+
+/* Ripple effect styles for theme switch */
+.ripple {
+    position: fixed;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    /* Adjust for light or dark effect */
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+    z-index: 1000;
+    /* Ensure it's above other elements */
+}
+
+@keyframes ripple {
+    100% {
+        transform: scale(100);
+        opacity: 0;
+    }
+}
+
+/* Remove the media query that overrides the dark-mode class */
+
+/*
+@media (prefers-color-scheme: dark) {
+    .hero-content h1 {
+        color: #ffffff;
+        /* White color for dark mode */
+
+/* About Section */
+.about-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 2rem;
+}
+
+.about-text {
+    flex: 1;
+    min-width: 300px;
+    margin-right: 2rem;
+}
+
+.about-text h1 {
+    margin-bottom: 2rem;
+    /* Increased space below About Me header */
+}
+
+.about-text .header-text {
+    color: #ff4757; /* Set "About Me" header color to #ff4757 */
+}
+
+.about-text p {
+    font-size: 1.3rem; /* Increased from 1.2rem to 1.3rem for enhanced readability */
+    margin-bottom: 1.5rem; /* Add spacing between paragraphs */
+}
+
+.about-images {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.about-images img {
+    width: calc(50% - 10px);
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Jagged Alignment */
+.about-images img:nth-child(odd) {
+    align-self: flex-start;
+}
+
+.about-images img:nth-child(even) {
+    align-self: flex-end;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .about-container {
+        flex-direction: column;
+    }
+
+    .about-images {
+        justify-content: center;
+    }
+
+    .about-images img {
+        width: 100%;
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    0% {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+[data-animate] {
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+[data-animate].active {
+    opacity: 1;
+}
+
+[data-animate="fadeIn"] {
+    animation: fadeIn 0.8s ease-out;
+}
+
+[data-animate="fadeInUp"] {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+[data-animate="fadeInLeft"] {
+    animation: fadeInLeft 0.8s ease-out;
+}
+
+[data-animate="fadeInRight"] {
+    animation: fadeInRight 0.8s ease-out;
+}
+
+.education-title {
+    color: #ff4757;  /* Same red color used elsewhere in your site */
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    font-weight: bold;
+}
+
+/* Add dark mode support */
+body.dark-mode .education-title {
+    color: #f8f8f8;  /* Keep the same color in dark mode */
+}
+
+/* Update fade-in animation */
+.fade-in-element {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease-out;
+}
+
+.fade-in-element.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Add margin-top to account for fixed header */
+#about {
+    margin-top: 80px;
+}
+
+/* Remove the complex animation keyframes and data-animate styles since we're using simpler transitions */

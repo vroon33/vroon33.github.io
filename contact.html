@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - My Profile</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" href="images/Picture1.png" type="image/png">
+</head>
+<body>
+
+    <header>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About Me</a></li>
+                <li><a href="education.html">Education</a></li> <!-- Added Education link -->
+                <li><a href="skills.html">Skills</a></li>
+                <li><a href="projects.html">Projects</a></li>
+                <li><a href="contact.html" class="active">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="contact">
+            <h1 class="header-text">Contact Me</h1>
+            <p>If you have any questions or would like to connect, feel free to reach out using the contact form below or email me directly.</p>
+            <form action="submit_contact.php" method="POST">
+                <label for="name">Your Name:</label>
+                <input type="text" id="name" name="name" required><br>
+
+                <label for="email">Your Email:</label>
+                <input type="email" id="email" name="email" required><br>
+
+                <label for="message">Your Message:</label>
+                <textarea id="message" name="message" required></textarea><br>
+
+                <button type="submit">Send Message</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <div class="social-links">
+            <a href="https://github.com/GroanKing05" target="_blank"><i class="fab fa-github"></i></a>
+            <a href="https://www.linkedin.com/in/varun-shastry05" target="_blank"><i class="fab fa-linkedin"></i></a>
+            <a href="mailto:varun.shastry@research.iiit.ac.in"><i class="fas fa-envelope"></i></a>
+            <a href="https://www.instagram.com/varuns.05/" target="_blank"><i class="fab fa-instagram"></i></a>
+        </div>
+        <p>&copy; 2024 My Profile. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
