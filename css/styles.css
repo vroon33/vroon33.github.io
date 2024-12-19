@@ -138,10 +138,14 @@ footer {
 }
 
 .social-links a {
-    color: #fff;
+    color: #333; /* Default color for light mode */
     font-size: 1.5rem;
     margin: 0 1rem;
     transition: color 0.3s ease, transform 0.3s ease;
+}
+
+body.dark-mode .social-links a {
+    color: #fff; /* Color for dark mode */
 }
 
 .social-links a:hover .fa-github {
@@ -162,6 +166,14 @@ footer {
 .social-links a:hover .fa-instagram {
     color: #E1306C;
     transform: scale(1.2);
+}
+
+.footer-text {
+    color: #333; /* Default color for light mode */
+}
+
+body.dark-mode .footer-text {
+    color: #fff; /* Color for dark mode */
 }
 
 /* Theme Switch */
@@ -586,10 +598,14 @@ footer {
 }
 
 .social-links a {
-    color: #fff;
+    color: #333; /* Default color for light mode */
     font-size: 1.5rem;
     margin: 0 1rem;
     transition: color 0.3s ease, transform 0.3s ease;
+}
+
+body.dark-mode .social-links a {
+    color: #fff; /* Color for dark mode */
 }
 
 .social-links a:hover .fa-github {
@@ -619,6 +635,14 @@ social-links a:hover .fa-envelope {
 .social-links a:hover {
     /* Remove or adjust this general hover effect if it's causing conflicts */
     /* color: #ff4757; */
+}
+
+.footer-text {
+    color: #333; /* Default color for light mode */
+}
+
+body.dark-mode .footer-text {
+    color: #fff; /* Color for dark mode */
 }
 
 /* Theme Switch */

@@ -1,25 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Varun Shastry | Portfolio</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="icon" href="images/Picture1.png" type="image/x-icon">
+    <style>
+        body, html {
+            overflow: hidden;
+        }
+        main {
+            height: calc(100vh - 80px); /* Adjust based on header/footer height */
+        }
+        .hero-content, .hero-image {
+            flex: 1;
+        }
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+        }
+        .hero-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .hero-image img {
+            max-height: 80%;
+            max-width: 80%;
+            border-radius: 50%;
+        }
+    </style>
 </head>
+
 <body>
     <header>
         <nav>
             <div class="logo">Varun Shastry</div>
             <ul class="nav-links">
                 <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="about.html" >About Me</a></li>
-                <li><a href="education.html" >Education</a></li>
-                <li><a href="skills.html" >Skills</a></li>
-                <li><a href="projects.html" >Projects</a></li>
-                <li><a href="contact.html" >Contact</a></li>
+                <li><a href="about.html">About Me</a></li>
+                <li><a href="education.html">Education</a></li>
+                <li><a href="skills.html">Skills</a></li>
+                <li><a href="projects.html">Projects</a></li>
+                <li><a href="contact.html">Contact</a></li>
             </ul>
             <div class="theme-switch-wrapper">
                 <label class="theme-switch" for="theme-toggle">
@@ -31,28 +62,29 @@
     </header>
 
     <main>
-        <section id="hero">
+        <section id="hero" style="display: flex;">
             <div class="hero-content">
-                <h1>Hi, I'm <span class="highlight">Varun Shastry</span></h1>
+                <h1>Hi! I'm <span class="highlight">Varun Shastry</span></h1>
                 <p>ECD Sophomore, IIIT Hyderabad</p>
-                <a href="projects.html"  class="btn">See My Work</a>
+                <a href="projects.html" class="btn">See My Work</a>
             </div>
             <div class="hero-image">
-                <img src="images/profile.jpg" alt="Varun Shastry">
+                <img src="images/me3.jpg" alt="Varun Shastry">
             </div>
         </section>
     </main>
 
     <footer>
         <div class="social-links">
-            <a href="https://github.com/GroanKing05" ><i class="fab fa-github"></i></a>
-            <a href="https://www.linkedin.com/in/varun-shastry05" ><i class="fab fa-linkedin"></i></a>
+            <a href="https://github.com/GroanKing05"><i class="fab fa-github"></i></a>
+            <a href="https://www.linkedin.com/in/varun-shastry05"><i class="fab fa-linkedin"></i></a>
             <a href="mailto:varun.shastry@research.iiit.ac.in"><i class="fas fa-envelope"></i></a>
-            <a href="https://www.instagram.com/varuns.05/" ><i class="fab fa-instagram"></i></a>
+            <a href="https://www.instagram.com/varuns.05/"><i class="fab fa-instagram"></i></a>
         </div>
         <p>&copy; 2024 Varun Shastry. All rights reserved.</p>
     </footer>
 
     <script src="js/script.js"></script>
 </body>
+
 </html>
