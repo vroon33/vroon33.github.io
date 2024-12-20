@@ -37,6 +37,15 @@
             max-width: 80%;
             border-radius: 50%;
         }
+        .social-links a {
+            color: #fff; /* Default color for light mode */
+            font-size: 1.5rem;
+            margin: 0 1rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+        body.dark-mode .social-links a {
+            color: #fff; /* Color for dark mode */
+        }
     </style>
 </head>
 
@@ -50,7 +59,7 @@
                 <li><a href="education.html">Education</a></li>
                 <li><a href="skills.html">Skills</a></li>
                 <li><a href="projects.html">Projects</a></li>
-                <li><a href="resume.pdf" download>Resume</a></li>
+                <!-- <li><a href="resume.pdf" download>Resume</a></li> -->
             </ul>
             <div class="theme-switch-wrapper">
                 <label class="theme-switch" for="theme-toggle">
@@ -85,6 +94,27 @@
     </footer>
 
     <script src="js/script.js"></script>
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // Apply saved theme on page load
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            body.classList.add(savedTheme);
+            themeToggle.checked = savedTheme === 'dark-mode';
+        }
+
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light-mode');
+            }
+        });
+    </script>
 </body>
 
 </html>

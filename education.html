@@ -8,6 +8,51 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="icon" href="images/Picture1.png" type="image/x-icon">
+    <style>
+        main {
+            margin-top: 80px; /* Adjust based on header height */
+        }
+        .education-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .education-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4rem;
+        }
+        .education-content {
+            flex: 1;
+            margin-right: 2rem;
+        }
+        .education-header {
+            margin-bottom: 1rem;
+        }
+        .education-header h3 {
+            font-size: 2rem;
+            color: #333;
+        }
+        .education-years {
+            font-size: 1.5rem;
+            color: #777;
+        }
+        .education-details p {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+        .education-image {
+            flex: 1;
+            text-align: right;
+        }
+        .education-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -19,8 +64,7 @@
                 <li><a href="education.html" class="active">Education</a></li>
                 <li><a href="skills.html">Skills</a></li>
                 <li><a href="projects.html">Projects</a></li>
-                <!-- <li><a href="contact.html">Contact</a></li> -->
-                <li><a href="resume.pdf" download>Resume</a></li>
+                <!-- <li><a href="resume.pdf" download>Resume</a></li> -->
             </ul>            
             <div class="theme-switch-wrapper">
                 <label class="theme-switch" for="theme-toggle">
@@ -99,5 +143,26 @@
     </footer>
 
     <script src="js/script.js"></script>
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // Apply saved theme on page load
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            body.classList.add(savedTheme);
+            themeToggle.checked = savedTheme === 'dark-mode';
+        }
+
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light-mode');
+            }
+        });
+    </script>
 </body>
 </html>

@@ -1,15 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Varun Shastry | Projects</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="icon" href="images/Picture1.png" type="image/x-icon">
     <link rel="stylesheet" href="css/dark-mode.css">
+    <style>
+        main {
+            margin-top: 80px;
+            /* Adjust based on header height */
+        }
+
+        .projects-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .projects-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .project-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4rem;
+        }
+
+        .project-content {
+            flex: 1;
+            margin-right: 2rem;
+        }
+
+        .project-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .project-content p {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .project-image {
+            flex: 1;
+            text-align: right;
+        }
+
+        .project-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .project-item {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .project-content {
+                margin-right: 0;
+                margin-bottom: 2rem;
+                text-align: center;
+            }
+
+            .project-image {
+                text-align: center;
+            }
+
+            .project-image img {
+                max-width: 80%;
+            }
+        }
+
+        body.dark-mode .project-content a[href*="github.com"] {
+            color: #00ffff; /* Cyan color for dark mode */
+        }
+    </style>
 </head>
+
 <body>
     <header>
         <nav>
@@ -20,7 +100,7 @@
                 <li><a href="education.html">Education</a></li>
                 <li><a href="skills.html">Skills</a></li>
                 <li><a href="projects.html" class="active">Projects</a></li>
-                <!-- <li><a href="contact.html">Contact</a></li> -->
+                <!-- <li><a href="resume.pdf" download>Resume</a></li> -->
             </ul>
             <div class="theme-switch-wrapper">
                 <label class="theme-switch" for="theme-toggle">
@@ -36,24 +116,44 @@
             <div class="projects-container fade-in-element">
                 <h1 class="projects-title">My Projects</h1>
                 <div class="project-item">
-                    <h2>Project 1: Portfolio Website</h2>
-                    <p>This is the portfolio website you are currently viewing. Built using HTML, CSS, and JavaScript, it demonstrates my skills in web design and front-end development. <a href="https://github.com/myprofile" target="_blank">View on GitHub</a></p>
+                    <div class="project-content">
+                        <h2>1: A Simplified Bird-Chirp Identifier!</h2>
+                        <p>This project was done as part of the M24 Signal Processing Project. The bird-chirp from a set of task files is mapped to a set of given reference bird-chirps, using the concepts of spectrograms and cross-correlations in MATLAB! <a
+                                href="https://github.com/GroanKing05/Fast-and-Fourier/tree/main/Task1" target="_blank">View on GitHub</a></p>
+                    </div>
                     <div class="project-image">
-                        <img src="images/Picture1.png" alt="Project Image">
+                        <img src="images/spectrogram.png" alt="Project Image" style="max-width:110%;">
                     </div>
                 </div>
                 <div class="project-item">
-                    <h2>Project 2: E-commerce Web App</h2>
-                    <p>An e-commerce application built with Node.js and MongoDB. It allows users to browse products, add them to a cart, and purchase them securely. <a href="https://github.com/myprofile" target="_blank">View on GitHub</a></p>
+                    <div class="project-content">
+                        <h2>2: 4-bit Carry Lookahead Adder</h2>
+                        <p>A CMOS-styled 4-bit carry look-ahead adder was created using NGSpice netlists, MAGIC for layout, and iVerilog, with the design optimized to meet specific delay requirements. Some other topologies are also used. <a href="https://github.com/GroanKing05/4bit-CLA"
+                                target="_blank">View on GitHub</a></p>
+                    </div>
                     <div class="project-image">
-                        <img src="images/Picture1.png" alt="Project Image">
+                        <img src="images/circuit.png" alt="Project Image" style="max-width:60%;">
                     </div>
                 </div>
                 <div class="project-item">
-                    <h2>Project 3: Task Management System</h2>
-                    <p>This web app enables users to manage tasks with ease. Built using React, it integrates with a Node.js back-end to fetch and store tasks. <a href="https://github.com/myprofile" target="_blank">View on GitHub</a></p>
+                    <div class="project-content">
+                        <h2>3: ECG-Based Heart Rate Analyzer </h2>
+                        <p>This MATLAB script reads the ECG file in the form of a .mat file and uses the R-R peak detection algorithm on the QRS complexes in the ECG data, to give the average heart rate. Appropriate noise filters are also utilized. <a href="https://github.com/GroanKing05/Fast-and-Fourier/tree/main/Task2"
+                                target="_blank">View on GitHub</a></p>
+                    </div>
                     <div class="project-image">
-                        <img src="images/Picture1.png" alt="Project Image">
+                        <img src="images/HR.png" alt="Project Image" style="max-width:60%;">
+                    </div>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-content">
+                        <h2>4: A simplified SCARA bot</h2>
+                        <p>A simplified model of a SCARA bot is implemented in MATLAB and Simulink, done as part of the Systems Thinking team project. <a href="https://github.com/GroanKing05/simplified-scara-bot"
+                                target="_blank">View on GitHub</a></p>
+                    </div>
+                    <div class="project-image">
+                        <img src="images/scara.png" alt="Project Image" style="max-width:60%;">
                     </div>
                 </div>
             </div>
@@ -62,10 +162,13 @@
 
     <footer>
         <div class="social-links">
-            <a href="https://github.com/GroanKing05" target="_blank" class="social-link"><i class="fab fa-github"></i></a>
-            <a href="https://www.linkedin.com/in/varun-shastry05" target="_blank" class="social-link"><i class="fab fa-linkedin"></i></a>
+            <a href="https://github.com/GroanKing05" target="_blank" class="social-link"><i
+                    class="fab fa-github"></i></a>
+            <a href="https://www.linkedin.com/in/varun-shastry05" target="_blank" class="social-link"><i
+                    class="fab fa-linkedin"></i></a>
             <a href="mailto:varun.shastry@research.iiit.ac.in" class="social-link"><i class="fas fa-envelope"></i></a>
-            <a href="https://www.instagram.com/varuns.05/" target="_blank" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.instagram.com/varuns.05/" target="_blank" class="social-link"><i
+                    class="fab fa-instagram"></i></a>
         </div>
         <p class="footer-text">&copy; 2024 Varun Shastry. All rights reserved.</p>
     </footer>
@@ -75,13 +178,23 @@
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
 
+        // Apply saved theme on page load
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            body.classList.add(savedTheme);
+            themeToggle.checked = savedTheme === 'dark-mode';
+        }
+
         themeToggle.addEventListener('change', () => {
             if (themeToggle.checked) {
                 body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark-mode');
             } else {
                 body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light-mode');
             }
         });
     </script>
 </body>
+
 </html>

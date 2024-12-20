@@ -4,15 +4,15 @@ const body = document.body;
 const navLinks = document.querySelectorAll('.nav-links a');
 const educationItems = document.querySelectorAll('.education-item');
 
-// Check and Apply Saved Theme Preference
+// Apply saved theme on page load
 const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'dark-mode') {
-    body.classList.add('dark-mode');
-    themeSwitch.checked = true;
+if (savedTheme) {
+    body.classList.add(savedTheme);
+    themeSwitch.checked = savedTheme === 'dark-mode';
 }
 
 // Theme Toggle with Ripple Effect
-themeSwitch.addEventListener('change', function (e) {
+themeSwitch.addEventListener('change', function () {
     if (this.checked) {
         body.classList.add('dark-mode');
         localStorage.setItem('theme', 'dark-mode');
@@ -40,85 +40,62 @@ navLinks.forEach(link => {
 });
 
 // Highlight Active Navigation Link on Scroll
-window.addEventListener('scroll', function () {
+window.addEventListener('scroll', () => {
     const sections = document.querySelectorAll('section');
-    navLinks.forEach(link => link.classList.remove('active'));
+    let scrollY = window.scrollY + window.innerHeight / 3;
+
     sections.forEach(section => {
         const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
+        const sectionHeight = section.offsetHeight;
+        const sectionId = section.getAttribute('id');
 
-        if (window.scrollY >= sectionTop - sectionHeight / 3) {
-            const currentId = section.getAttribute('id');
-            navLinks.forEach(link => {
-                if (link.getAttribute('href') === `#${currentId}`) {
-                    link.classList.add('active');
-                }
-            });
+        if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            navLinks.forEach(link => link.classList.remove('active'));
+            const activeLink = document.querySelector(`.nav-links a[href="#${sectionId}"]`);
+            if (activeLink) activeLink.classList.add('active');
         }
     });
 });
 
 // Intersection Observer for Education Section Fade-In
-if (educationItems.length > 0) {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('active');
-            } else {
-                entry.target.classList.remove('active');
-            }
-        });
-    }, { threshold: 0.2 });
-
-    educationItems.forEach(item => observer.observe(item));
-}
-
-// Simplify the fade-in observer
-const fadeInObserver = new IntersectionObserver((entries) => {
+const sectionObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
-            entry.target.classList.add('fade-in');
+            entry.target.classList.add('active');
+            sectionObserver.unobserve(entry.target); // Stop observing once visible
         }
     });
-}, { threshold: 0.1 });
+}, { threshold: 0.2 });
 
-// Initialize fade-in elements
+educationItems.forEach(item => sectionObserver.observe(item));
+
+// Simplify the fade-in observer
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.fade-in-element').forEach(item =>
-        fadeInObserver.observe(item)
-    );
+    const fadeElements = document.querySelectorAll('.fade-in-element');
+    const fadeInObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in');
+                fadeInObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    fadeElements.forEach(item => fadeInObserver.observe(item));
 });
 
 // On Page Load: Add Animation Class and Reset Scroll
 window.addEventListener('load', () => {
-    document.body.classList.add('page-loaded');
+    body.classList.add('page-loaded');
     window.scrollTo(0, 0);
 });
 
 // Prevent Animation During Resize
 let resizeTimer;
 window.addEventListener('resize', () => {
-    document.body.classList.add('resize-animation-stopper');
+    body.classList.add('resize-animation-stopper');
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-        document.body.classList.remove('resize-animation-stopper');
+        body.classList.remove('resize-animation-stopper');
     }, 400);
-});
-
-// Initialize animations on DOM content loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('active');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, {
-        threshold: 0.1
-    });
-
-    document.querySelectorAll('[data-animate]').forEach(el => {
-        observer.observe(el);
-    });
 });

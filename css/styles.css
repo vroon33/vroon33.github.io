@@ -122,7 +122,7 @@ section h2 {
     font-size: 2rem;
     margin-bottom: 2rem;
     text-align: center;
-    color: #4ecdc4;
+    color: #ff4757;
 }
 
 /* Footer */
@@ -270,7 +270,7 @@ body.dark-mode {
 }
 
 .dark-mode section h2 {
-    color: #4ecdc4;
+    color: #ff4757;
 }
 
 .dark-mode footer {
@@ -667,7 +667,7 @@ section h2 {
     font-size: 2rem;
     margin-bottom: 2rem;
     text-align: center;
-    color: #4ecdc4;
+    color: #ff4757;
 }
 
 /* Footer */
@@ -694,13 +694,13 @@ body.dark-mode .social-links a {
 }
 
 .social-links a:hover .fa-github {
-    color: #4078c0;
+    color: #319ea4;
     /* GitHub color */
     transform: scale(1.2);
 }
 
 .social-links a:hover .fa-linkedin {
-    color: #0077B5;
+    color: #319ea4;
     /* LinkedIn color */
     transform: scale(1.2);
 }
@@ -831,7 +831,7 @@ body.dark-mode .hero-content h1 {
 }
 
 .dark-mode section h2 {
-    color: #4ecdc4;
+    color: #ff4757;
 }
 
 .dark-mode footer {
