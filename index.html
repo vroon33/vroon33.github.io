@@ -374,6 +374,7 @@
             .quote {
                 font-size: 1.5rem;
             }
+
             .quote-author {
                 font-size: 1rem;
             }
@@ -851,10 +852,10 @@
         }
 
         // Scribble Animation on Scroll (Apple-style)
-        (function() {
+        (function () {
             const path = document.getElementById("scribblePath");
             if (!path) return;
-            
+
             const totalLength = path.getTotalLength();
             path.style.strokeDasharray = totalLength;
             path.style.strokeDashoffset = totalLength;
@@ -862,7 +863,7 @@
             function updateScribble() {
                 const wrapper = document.querySelector(".scribble-wrapper");
                 if (!wrapper) return;
-                
+
                 const rect = wrapper.getBoundingClientRect();
                 const windowHeight = window.innerHeight;
 
@@ -880,7 +881,7 @@
         })();
 
         // Highlight text animation on scroll
-        (function() {
+        (function () {
             const highlightElement = document.querySelector('.highlight-text');
             if (!highlightElement) return;
 
@@ -947,84 +948,108 @@
             }
         ];
 
-        // Select random circuit
-        const selectedCircuit = circuits[Math.floor(Math.random() * circuits.length)];
+        // // Select random circuit
+        // const selectedCircuit = circuits[Math.floor(Math.random() * circuits.length)];
 
         // Iterate through all circuits (commented out)
-        // let currentCircuitIndex = parseInt(localStorage.getItem('circuitIndex') || '0');
-        // const selectedCircuit = circuits[currentCircuitIndex];
-        // currentCircuitIndex = (currentCircuitIndex + 1) % circuits.length;
-        // localStorage.setItem('circuitIndex', currentCircuitIndex.toString());
+        let currentCircuitIndex = parseInt(localStorage.getItem('circuitIndex') || '0');
+        const selectedCircuit = circuits[currentCircuitIndex];
+        currentCircuitIndex = (currentCircuitIndex + 1) % circuits.length;
+        localStorage.setItem('circuitIndex', currentCircuitIndex.toString());
 
-        // Load selected circuit SVG
-        fetch(`images/${selectedCircuit.file}`)
-            .then(response => response.text())
-            .then(svgText => {
-                const parser = new DOMParser();
-                const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-                const svgElement = svgDoc.querySelector('svg');
-                const pathElement = svgDoc.querySelector('path');
+        // Special handling for Interlagos (already embedded in HTML)
+        // if (selectedCircuit.name === 'Interlagos') {
+        //     const trackSvg = document.querySelector('.f1-track');
+        //     trackSvg.style.width = '95%';
+        //     trackSvg.style.height = '95%';
+        //     trackSvg.style.maxWidth = '1250px';
+        //     trackSvg.style.maxHeight = '1250px';
+        //     trackSvg.style.transform = 'rotate(90deg)';
+        //     window.scrollTo(0, 0);
+        //     initAnimation(selectedCircuit);
+        // } else {
+            // Load selected circuit SVG
+            fetch(`images/${selectedCircuit.file}`)
+                .then(response => response.text())
+                .then(svgText => {
+                    const parser = new DOMParser();
+                    const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+                    const svgElement = svgDoc.querySelector('svg');
+                    const pathElement = svgDoc.querySelector('path');
 
-                if (svgElement && pathElement) {
-                    // Update track SVG
-                    const trackSvg = document.querySelector('.f1-track');
-                    trackSvg.setAttribute('viewBox', svgElement.getAttribute('viewBox'));
+                    if (svgElement && pathElement) {
+                        // Update track SVG
+                        const trackSvg = document.querySelector('.f1-track');
+                        trackSvg.setAttribute('viewBox', svgElement.getAttribute('viewBox'));
 
-                    // Apply circuit-specific scaling
-                    if (selectedCircuit.name === 'Monaco') {
-                        trackSvg.style.width = '75%';
-                        trackSvg.style.height = '75%';
-                        trackSvg.style.maxWidth = '1200px';
-                        trackSvg.style.maxHeight = '1200px';
-                        trackSvg.style.transform = 'rotate(0deg) translateY(-5%)';
-                    } else if (selectedCircuit.name === 'Bahrain') {
-                        trackSvg.style.width = '80%';
-                        trackSvg.style.height = '80%';
-                        trackSvg.style.maxWidth = '950px';
-                        trackSvg.style.maxHeight = '950px';
-                        trackSvg.style.transform = 'rotate(0deg) translateY(-10%)';
-                    } else if (selectedCircuit.name === 'RedBull') {
-                        trackSvg.style.width = '70%';
-                        trackSvg.style.height = '70%';
-                        trackSvg.style.maxWidth = '1000px';
-                        trackSvg.style.maxHeight = '1000px';
-                        trackSvg.style.transform = 'rotate(0deg) translateY(-6%)';
-                    } else if (selectedCircuit.name === 'Shanghai') {
-                        trackSvg.style.width = '80%';
-                        trackSvg.style.height = '80%';
-                        trackSvg.style.maxWidth = '900px';
-                        trackSvg.style.maxHeight = '900px';
-                        trackSvg.style.transform = 'rotate(0deg) translateY(-8%)';
-                    } else if (selectedCircuit.name === 'Silverstone') {
-                        trackSvg.style.width = '65%';
-                        trackSvg.style.height = '65%';
-                        trackSvg.style.maxWidth = '950px';
-                        trackSvg.style.maxHeight = '950px';
-                        trackSvg.style.transform = 'rotate(150deg)';
-                    } else if (selectedCircuit.name === 'Spa') {
-                        trackSvg.style.width = '70%';
-                        trackSvg.style.height = '70%';
-                        trackSvg.style.maxWidth = '1000px';
-                        trackSvg.style.maxHeight = '1000px';
-                        trackSvg.style.transform = 'rotate(0deg)';
-                    } else {
-                        trackSvg.style.width = '95%';
-                        trackSvg.style.height = '95%';
-                        trackSvg.style.maxWidth = '1250px';
-                        trackSvg.style.maxHeight = '1250px';
-                        trackSvg.style.transform = 'rotate(90deg)';
+                        // Apply circuit-specific scaling
+                        if (selectedCircuit.name === 'Monaco') {
+                            trackSvg.style.width = '75%';
+                            trackSvg.style.height = '75%';
+                            trackSvg.style.maxWidth = '1200px';
+                            trackSvg.style.maxHeight = '1200px';
+                            trackSvg.style.transform = 'rotate(0deg) translateY(-5%)';
+                        } else if (selectedCircuit.name === 'Bahrain') {
+                            trackSvg.style.width = '80%';
+                            trackSvg.style.height = '80%';
+                            trackSvg.style.maxWidth = '950px';
+                            trackSvg.style.maxHeight = '950px';
+                            trackSvg.style.transform = 'rotate(0deg) translateY(-10%)';
+                        } else if (selectedCircuit.name === 'RedBull') {
+                            trackSvg.style.width = '70%';
+                            trackSvg.style.height = '70%';
+                            trackSvg.style.maxWidth = '1000px';
+                            trackSvg.style.maxHeight = '1000px';
+                            trackSvg.style.transform = 'rotate(0deg) translateY(-6%)';
+                        } else if (selectedCircuit.name === 'Shanghai') {
+                            trackSvg.style.width = '80%';
+                            trackSvg.style.height = '80%';
+                            trackSvg.style.maxWidth = '900px';
+                            trackSvg.style.maxHeight = '900px';
+                            trackSvg.style.transform = 'rotate(0deg) translateY(-8%)';
+                        } else if (selectedCircuit.name === 'Silverstone') {
+                            trackSvg.style.width = '65%';
+                            trackSvg.style.height = '65%';
+                            trackSvg.style.maxWidth = '950px';
+                            trackSvg.style.maxHeight = '950px';
+                            trackSvg.style.transform = 'rotate(150deg)';
+                        } else if (selectedCircuit.name === 'Spa') {
+                            trackSvg.style.width = '70%';
+                            trackSvg.style.height = '70%';
+                            trackSvg.style.maxWidth = '1000px';
+                            trackSvg.style.maxHeight = '1000px';
+                            trackSvg.style.transform = 'rotate(0deg)';
+                        } else {
+                            trackSvg.style.width = '95%';
+                            trackSvg.style.height = '95%';
+                            trackSvg.style.maxWidth = '1250px';
+                            trackSvg.style.maxHeight = '1250px';
+                            trackSvg.style.transform = 'rotate(90deg)';
+                        }
+
+                        const trackPath = document.getElementById('trackPath');
+                        trackPath.setAttribute('d', pathElement.getAttribute('d'));
+
+                        // Scroll to top after loading
+                        window.scrollTo(0, 0);
+
+                        // Initialize animation
+                        initAnimation(selectedCircuit);
                     }
-
-                    const trackPath = document.getElementById('trackPath');
-                    trackPath.setAttribute('d', pathElement.getAttribute('d'));
-
-                    // Scroll to top after loading
+                })
+                .catch(error => {
+                    console.error('Error loading circuit:', error);
+                    // Fallback to embedded Interlagos if loading fails
+                    const trackSvg = document.querySelector('.f1-track');
+                    trackSvg.style.width = '95%';
+                    trackSvg.style.height = '95%';
+                    trackSvg.style.maxWidth = '1250px';
+                    trackSvg.style.maxHeight = '1250px';
+                    trackSvg.style.transform = 'rotate(90deg)';
                     window.scrollTo(0, 0);
-
-                    // Initialize animation
-                    initAnimation(selectedCircuit);
-                }
-            });
+                    initAnimation(circuits[0]);
+                });
+        // }
 
         function initAnimation(circuit) {
             const path = document.getElementById('trackPath');
