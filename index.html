@@ -4,101 +4,787 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Varun Shastry | Portfolio</title>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Varun Shastry</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="icon" href="images/Picture1.png" type="image/x-icon">
+    <link rel="icon" href="images/circle_pfp.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body, html {
-            overflow: hidden;
-        }
         main {
-            height: calc(100vh - 80px); /* Adjust based on header/footer height */
+            margin-top: 72px;
         }
-        .hero-content, .hero-image {
-            flex: 1;
-        }
-        .hero-content {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 20px;
-        }
-        .hero-image {
+
+        #hero {
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
         }
-        .hero-image img {
-            max-height: 80%;
-            max-width: 80%;
-            border-radius: 50%;
+
+        .f1-track {
+            position: absolute;
+            width: 65%;
+            height: 65%;
+            max-width: 950px;
+            max-height: 950px;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+            transform: rotate(120deg);
         }
-        .social-links a {
-            color: #fff; /* Default color for light mode */
-            font-size: 1.5rem;
-            margin: 0 1rem;
-            transition: color 0.3s ease, transform 0.3s ease;
+
+        @media (max-width: 768px) {
+            .f1-track {
+                display: none;
+            }
         }
-        body.dark-mode .social-links a {
-            color: #fff; /* Color for dark mode */
+
+        .track-outline {
+            stroke: #2d0b5f;
+        }
+
+        body.dark-mode .track-outline {
+            stroke: #a78bfa;
+        }
+
+        .racing-dot {
+            fill: #ff0000;
+            filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.6)) drop-shadow(0 0 2px rgba(255, 0, 0, 0.4));
+        }
+
+        body.dark-mode .racing-dot {
+            fill: #ff9999 !important;
+            filter: drop-shadow(0 0 4px rgba(255, 153, 153, 0.6)) drop-shadow(0 0 2px rgba(255, 153, 153, 0.4)) !important;
+        }
+
+        .hero-content {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #000;
+        }
+
+        .hero-content h1 .greeting {
+            color: #000;
+            background: none;
+        }
+
+        .hero-content h1 .name {
+            color: #000;
+            background: none;
+        }
+
+        body.dark-mode .hero-content h1 .greeting {
+            color: #fff !important;
+            background: none !important;
+        }
+
+        body.dark-mode .hero-content h1 .name {
+            color: #e9d5ff !important;
+            background: none !important;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #555;
+        }
+
+        body.dark-mode .hero-content p {
+            color: #ccc;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background-color: transparent;
+            color: #5b21b6;
+            border: 1px solid #5b21b6;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: rgba(91, 33, 182, 0.1);
+        }
+
+        body.dark-mode .btn {
+            color: #c4b5fd;
+            border: 1px solid #c4b5fd;
+        }
+
+        body.dark-mode .btn:hover {
+            background-color: rgba(196, 181, 253, 0.1);
+        }
+
+        body.dark-mode #about h2 {
+            color: #c4b5fd;
+        }
+
+        body.dark-mode #about p {
+            color: #f7fafc;
+        }
+
+        /* Project Cards */
+        .project-card {
+            background: #ffffff;
+            border: 1px solid rgba(91, 33, 182, 0.2);
+            border-radius: 8px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.dark-mode .project-card {
+            background: rgba(196, 181, 253, 0.05);
+            border: 1px solid rgba(196, 181, 253, 0.2);
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(91, 33, 182, 0.15);
+            border-color: #5b21b6;
+            background: rgba(91, 33, 182, 0.05);
+        }
+
+        body.dark-mode .project-card:hover {
+            box-shadow: 0 10px 30px rgba(196, 181, 253, 0.15);
+            border-color: #c4b5fd;
+            background: rgba(196, 181, 253, 0.08);
+        }
+
+        .project-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: #333;
+            font-size: 1.3rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .project-title {
+            color: #f8f8f8;
+        }
+
+        .project-card:hover .project-title {
+            color: #5b21b6;
+        }
+
+        body.dark-mode .project-card:hover .project-title {
+            color: #c4b5fd;
+        }
+
+        .project-arrow {
+            transition: transform 0.3s ease;
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            min-height: 18px;
+        }
+
+        .project-card:hover .project-arrow {
+            transform: translate(4px, -4px);
+        }
+
+        .project-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+
+        body.dark-mode .project-description {
+            color: #ccd6f6;
+        }
+
+        .project-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: auto;
+            padding-top: 1rem;
+        }
+
+        .project-tech span {
+            font-size: 0.85rem;
+            color: #555;
+            padding: 0.25rem 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .project-tech span {
+            color: #ccd6f6;
+            border-color: #666;
+        }
+
+        .project-card:hover .project-tech span {
+            color: #5b21b6;
+            border-color: #5b21b6;
+        }
+
+        body.dark-mode .project-card:hover .project-tech span {
+            color: #c4b5fd;
+            border-color: #c4b5fd;
+        }
+
+        /* Social Icons */
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .social-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+        }
+
+        .social-icon:hover {
+            opacity: 1;
+            transform: translateY(-5px);
+        }
+
+        .social-icon svg {
+            width: 30px;
+            height: 30px;
+            fill: #333;
+            transition: fill 0.3s ease;
+        }
+
+        body.dark-mode .social-icon svg {
+            fill: #f8f8f8;
+        }
+
+        .social-icon:hover svg {
+            fill: #5b21b6;
+        }
+
+        /* Inspirational Quote Section */
+        .quote-section {
+            padding: 6rem 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .quote {
+            font-size: 2rem;
+            line-height: 1.6;
+            font-weight: 300;
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        body.dark-mode .quote {
+            color: #f0f0f0;
+        }
+
+        .scribble-wrapper {
+            position: relative;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .scribble {
+            position: absolute;
+            left: -12%;
+            top: 50%;
+            width: 140%;
+            height: 120%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #scribblePath {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            transition: stroke-dashoffset 0.1s linear;
+        }
+
+        .quote-author {
+            font-size: 1.2rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        body.dark-mode .quote-author {
+            color: #a0a0a0;
+        }
+
+        /* Highlight animation for "keep pushing" */
+        .highlight-text {
+            position: relative;
+            display: inline-block;
+            font-weight: 600;
+            color: #e11d48;
+        }
+
+        .highlight-text::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 100%;
+            background: linear-gradient(120deg, rgba(225, 29, 72, 0.2) 0%, rgba(225, 29, 72, 0.3) 100%);
+            transform: translateY(-50%) scaleX(0);
+            transform-origin: left;
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: -1;
+            border-radius: 4px;
+        }
+
+        body.dark-mode .highlight-text {
+            color: #fca5a5;
+        }
+
+        body.dark-mode .highlight-text::before {
+            background: linear-gradient(120deg, rgba(252, 165, 165, 0.2) 0%, rgba(252, 165, 165, 0.3) 100%);
+        }
+
+        .highlight-text.visible::before {
+            transform: translateY(-50%) scaleX(1);
+        }
+
+        @media (max-width: 768px) {
+            .quote {
+                font-size: 1.5rem;
+            }
+            .quote-author {
+                font-size: 1rem;
+            }
+        }
+
+        .social-icon:hover svg {
+            fill: #5b21b6;
+        }
+
+        body.dark-mode .social-icon:hover svg {
+            fill: #c4b5fd;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
         }
     </style>
 </head>
 
 <body>
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-content">
+            <img src="images/f1_black.png" alt="F1 Car" class="f1-car">
+        </div>
+    </div>
+
+    <div class="menu-backdrop" id="menuBackdrop"></div>
     <header>
         <nav>
-            <div class="logo">Varun Shastry</div>
-            <ul class="nav-links">
-                <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="about.html">About Me</a></li>
-                <li><a href="education.html">Education</a></li>
-                <li><a href="skills.html">Skills</a></li>
-                <li><a href="projects.html">Projects</a></li>
-                <!-- <li><a href="resume.pdf" download>Resume</a></li> -->
-            </ul>
-            <div class="theme-switch-wrapper">
-                <label class="theme-switch" for="theme-toggle">
-                    <input type="checkbox" id="theme-toggle">
-                    <div class="slider round"></div>
-                </label>
+            <div class="logo" id="logo">
+                <svg class="logo-circle-svg" width="54" height="54" viewBox="0 0 54 54">
+                    <circle class="logo-circle-outline" cx="27" cy="27" r="25" fill="none" stroke-width="2" />
+                </svg>
+                <img src="images/circle_pfp.png" alt="Varun Shastry" class="logo-img">
+            </div>
+            <div class="nav-right">
+                <ul class="nav-links" id="primary-navigation">
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#education">Education</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li class="mobile-theme-toggle">
+                        <div class="theme-switch-wrapper">
+                            <span class="theme-icon sun">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="5" />
+                                    <line x1="12" y1="1" x2="12" y2="3" />
+                                    <line x1="12" y1="21" x2="12" y2="23" />
+                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                                    <line x1="1" y1="12" x2="3" y2="12" />
+                                    <line x1="21" y1="12" x2="23" y2="12" />
+                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                                </svg>
+                            </span>
+                            <label class="theme-switch" for="theme-toggle">
+                                <input type="checkbox" id="theme-toggle">
+                                <div class="slider round"></div>
+                            </label>
+                            <span class="theme-icon moon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                                </svg>
+                            </span>
+                        </div>
+                    </li>
+                </ul>
+                <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false"
+                    aria-controls="primary-navigation">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+                <div class="theme-switch-wrapper desktop-theme-toggle">
+                    <span class="theme-icon sun">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </svg>
+                    </span>
+                    <label class="theme-switch" for="theme-toggle-desktop">
+                        <input type="checkbox" id="theme-toggle-desktop">
+                        <div class="slider round"></div>
+                    </label>
+                    <span class="theme-icon moon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                    </span>
+                </div>
             </div>
         </nav>
     </header>
 
     <main>
-        <section id="hero" style="display: flex;">
+        <section id="hero">
+            <!-- F1 Track Background - Interlagos -->
+            <svg class="f1-track" viewBox="0 0 236.78 369.74" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
+                <!-- Interlagos Circuit Path -->
+                <path id="trackPath" class="track-outline"
+                    d="m115.55 3.2011c-21.623 0.1455-61.465 15.194-75.52 29.486-14.394 14.637-36.83 95.503-36.83 132.75 0 10.019 13.414 70.116 21.922 98.211 1.0826 3.575 6.771 24.725 12.641 47 12.319 46.75 15.103 53.181 23.938 55.291 6.6785 1.5949 8.786 0.61431 16.568-7.7051 10.114-10.812 12.866-11.418 23.293-5.1309 28.646 17.272 68.787 2.2925 77.59-28.955 38.99-138.41 57.16-211.4 54.1-217.39-5.4-10.598-42.21-17.782-62.11-12.125-11.25 3.196-14.98 7.655-69.6 83.245-21.921 30.33-21.917 30.33-39.043 29.58-20.831-0.91-27.446-8.17-31.717-34.8-5.047-31.48-2.031-38.29 12.57-28.37 13.4 9.1001 21.659 9.5851 28.977 1.6992 9.1884-9.902 7.1776-15.864-12.088-35.832-15.614-16.187-24.939-40.431-18.351-47.711 3.9257-4.3378 8.4599-1.6946 19.979 11.643 22.376 25.909 37.664 30.74 57.035 18.023 11.142-7.3148 46.242-62.898 43.508-68.898-2.93-6.43-24.08-16.568-40.79-19.555-1.8-0.321-3.84-0.466-6.07-0.4509z"
+                    stroke-width="6.4" fill="none" />
+
+                <!-- Animated racing dot with realistic corner speeds -->
+                <circle id="racingDot" class="racing-dot" r="6" fill="#ff0000"></circle>
+            </svg>
+
             <div class="hero-content">
-                <h1>Hi! I'm <span class="highlight">Varun Shastry</span></h1>
-                <p>ECD Sophomore, IIIT Hyderabad</p>
-                <a href="projects.html" class="btn">See My Work</a>
+                <h1 class="reveal"><span class="greeting">Hi! I'm</span> <span class="name">Varun</span></h1>
+                <p class="reveal">ECE (B.Tech + MS), IIIT Hyderabad</p>
             </div>
-            <div class="hero-image">
-                <img src="images/me3.jpg" alt="Varun Shastry">
+        </section>
+
+        <section id="about" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto;">
+            <h2 class="reveal" style="font-size: 2rem; margin-bottom: 2rem; color: #5b21b6;">About Me</h2>
+            <p class="reveal" style="font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.6;">Hi! I'm Varun Shastry,
+                a third-year dual-degree student (B.Tech + MS by Research) in Electronics and Communication Engineering
+                at IIIT Hyderabad. My academic interests lie in computer architecture and machine learning, with a
+                strong inclination toward applied mathematics, particularly signal processing and information theory. I
+                enjoy learning in general!</p>
+            <p class="reveal" style="font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.6;">I am currently an
+                undergraduate research student with the Computer Systems Group (CSG) at IIIT Hyderabad, where I work on
+                FPGA-based accelerators and High-Level Synthesis (HLS).</p>
+            <p class="reveal" style="font-size: 1.1rem; line-height: 1.6;">Outside academics, I enjoy watching Formula
+                1, playing chess and sports, listening to music, and travelling.</p>
+        </section>
+
+        <!-- Inspirational Quote Section -->
+        <section class="quote-section reveal">
+            <p class="quote">
+                "Never give up. <span class="highlight-text">Keep pushing</span>."
+            </p>
+            <p class="quote-author">— Max Verstappen</p>
+        </section>
+
+        <section id="education" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto;">
+            <h2 class="reveal" style="font-size: 2rem; margin-bottom: 3rem; color: #5b21b6;">Education</h2>
+
+            <div class="reveal" style="margin-bottom: 3rem;">
+                <h3 style="font-size: 1.5rem; color: #5b21b6; margin-bottom: 0.5rem;">International Institute of
+                    Information Technology, Hyderabad*</h3>
+                <p style="font-size: 1rem; color: #777; margin: 0.5rem 0;">2023 - Present</p>
+                <p style="font-size: 1rem; margin-top: 0.5rem;">B.Tech + MS by Research in Electronics and Communication
+                    Engineering</p>
+                <p style="font-size: 0.95rem; margin-top: 0.75rem; color: #666;"><strong>Relevant Coursework:</strong>
+                    Statistical Methods in AI, Linear Algebra, Hardware for AI, Introduction to Processor Architecture,
+                    Signal Processing, C-Programming, Data Structures and Algorithms, Information Theory, VLSI Design.
+                </p>
+            </div>
+
+            <div class="reveal" style="margin-bottom: 3rem;">
+                <h3 style="font-size: 1.5rem; color: #5b21b6; margin-bottom: 0.5rem;">GVM's SNJA Higher Secondary
+                    School, Goa</h3>
+                <p style="font-size: 1rem; color: #777; margin: 0.5rem 0;">Class XII (2022-23)</p>
+                <p style="font-size: 1rem; margin-top: 0.5rem;">Grade: 90.1% (PCM + CS)</p>
+            </div>
+
+            <div class="reveal">
+                <h3 style="font-size: 1.5rem; color: #5b21b6; margin-bottom: 0.5rem;">A.J.De Almeida High School, Ponda
+                    Goa</h3>
+                <p style="font-size: 1rem; color: #777; margin: 0.5rem 0;">Class X (2020-21)</p>
+                <p style="font-size: 1rem; margin-top: 0.5rem;">Grade: 97.83%
+                </p>
+            </div>
+        </section>
+
+        <section id="skills" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto;">
+            <h2 class="reveal" style="font-size: 2rem; margin-bottom: 2rem; color: #5b21b6;">Skills</h2>
+            <div class="reveal" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
+                <span
+                    style="padding: 0.5rem 1rem; background: rgba(91, 33, 182, 0.1); color: #5b21b6; border-radius: 5px; font-size: 0.95rem; font-weight: 500;">Python</span>
+                <span
+                    style="padding: 0.5rem 1rem; background: rgba(91, 33, 182, 0.1); color: #5b21b6; border-radius: 5px; font-size: 0.95rem; font-weight: 500;">C/C++</span>
+                <span
+                    style="padding: 0.5rem 1rem; background: rgba(91, 33, 182, 0.1); color: #5b21b6; border-radius: 5px; font-size: 0.95rem; font-weight: 500;">HLS-C</span>
+                <span
+                    style="padding: 0.5rem 1rem; background: rgba(91, 33, 182, 0.1); color: #5b21b6; border-radius: 5px; font-size: 0.95rem; font-weight: 500;">MATLAB</span>
+                <span
+                    style="padding: 0.5rem 1rem; background: rgba(91, 33, 182, 0.1); color: #5b21b6; border-radius: 5px; font-size: 0.95rem; font-weight: 500;">Verilog</span>
+                <span
+                    style="padding: 0.5rem 1rem; background: rgba(91, 33, 182, 0.1); color: #5b21b6; border-radius: 5px; font-size: 0.95rem; font-weight: 500;">PyTorch</span>
+                <span
+                    style="padding: 0.5rem 1rem; background: rgba(91, 33, 182, 0.1); color: #5b21b6; border-radius: 5px; font-size: 0.95rem; font-weight: 500;">NumPy</span>
+                <span
+                    style="padding: 0.5rem 1rem; background: rgba(91, 33, 182, 0.1); color: #5b21b6; border-radius: 5px; font-size: 0.95rem; font-weight: 500;">Git</span>
+                <span
+                    style="padding: 0.5rem 1rem; background: rgba(91, 33, 182, 0.1); color: #5b21b6; border-radius: 5px; font-size: 0.95rem; font-weight: 500;">Vitis</span>
+                <span
+                    style="padding: 0.5rem 1rem; background: rgba(91, 33, 182, 0.1); color: #5b21b6; border-radius: 5px; font-size: 0.95rem; font-weight: 500;">Vivado</span>
+                <span
+                    style="padding: 0.5rem 1rem; background: rgba(91, 33, 182, 0.1); color: #5b21b6; border-radius: 5px; font-size: 0.95rem; font-weight: 500;">Signal
+                    Processing</span>
+                <span
+                    style="padding: 0.5rem 1rem; background: rgba(91, 33, 182, 0.1); color: #5b21b6; border-radius: 5px; font-size: 0.95rem; font-weight: 500;">Machine
+                    Learning</span>
+                <span
+                    style="padding: 0.5rem 1rem; background: rgba(91, 33, 182, 0.1); color: #5b21b6; border-radius: 5px; font-size: 0.95rem; font-weight: 500;">Bash
+                    Scripting</span>
+            </div>
+        </section>
+
+        <section id="projects" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto;">
+            <h2 class="reveal" style="font-size: 2rem; margin-bottom: 3rem; color: #5b21b6;">Projects</h2>
+
+            <div class="projects-grid">
+                <!-- Bird-Chirp Identifier -->
+                <a href="https://github.com/vroon33/Fast-and-Fourier" target="_blank" style="text-decoration: none;">
+                    <div class="project-card reveal">
+                        <div class="project-title">
+                            A Simplified Bird-Chirp Identifier
+                            <svg class="project-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="M7 17L17 7M17 7H7M17 7V17" />
+                            </svg>
+                        </div>
+                        <p class="project-description">
+                            This project was done as part of the M24 Signal Processing Project. The bird-chirp from a
+                            set of task files is mapped to a set of given reference bird-chirps, using the concepts of
+                            spectrograms and cross-correlations in MATLAB!
+                        </p>
+                        <div class="project-tech">
+                            <span>MATLAB</span>
+                            <span>Signal Processing</span>
+                            <span>Spectrograms</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 4-bit Carry Lookahead Adder -->
+                <a href="https://github.com/vroon33/4bit-CLA" target="_blank" style="text-decoration: none;">
+                    <div class="project-card reveal">
+                        <div class="project-title">
+                            4-bit Carry Lookahead Adder
+                            <svg class="project-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="M7 17L17 7M17 7H7M17 7V17" />
+                            </svg>
+                        </div>
+                        <p class="project-description">
+                            A CMOS-styled 4-bit carry look-ahead adder was created using NGSpice netlists, MAGIC for
+                            layout, and iVerilog, with the design optimized to meet specific delay requirements. Some
+                            other topologies are also used to reduce the delay.
+                        </p>
+                        <div class="project-tech">
+                            <span>NGSpice</span>
+                            <span>MAGIC</span>
+                            <span>Verilog</span>
+                            <span>VLSI Design</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Adaptive Filters -->
+                <a href="https://github.com/vroon33/HR-AdaptiveFiltering" target="_blank"
+                    style="text-decoration: none;">
+                    <div class="project-card reveal">
+                        <div class="project-title">
+                            Adaptive Filters and Vehicle Tracking
+                            <svg class="project-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="M7 17L17 7M17 7H7M17 7V17" />
+                            </svg>
+                        </div>
+                        <p class="project-description">
+                            In this project I designed and compared various adaptive filters like the LMS filter, RLS,
+                            the Steepest Descent. The second problem involved tracking a vehicle's position and speed
+                            using the Kalman Filter.
+                        </p>
+                        <div class="project-tech">
+                            <span>MATLAB</span>
+                            <span>Adaptive Filters</span>
+                            <span>Kalman Filter</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- RISC-V Processor -->
+                <a href="https://github.com/vroon33/RISC-V-Processor/" target="_blank" style="text-decoration: none;">
+                    <div class="project-card reveal">
+                        <div class="project-title">
+                            RISC-V Processor
+                            <svg class="project-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="M7 17L17 7M17 7H7M17 7V17" />
+                            </svg>
+                        </div>
+                        <p class="project-description">
+                            We implemented a pipelined processor supporting a subset of the basic RV32I instruction set,
+                            like some arithmetic operations, loads and stores, etc.
+                        </p>
+                        <div class="project-tech">
+                            <span>Verilog</span>
+                            <span>Computer Architecture</span>
+                            <span>RISC-V</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Audio Amplifier -->
+                <a href="https://github.com/vroon33/AudioAmplifier" target="_blank" style="text-decoration: none;">
+                    <div class="project-card reveal">
+                        <div class="project-title">
+                            Audio Amplifier
+                            <svg class="project-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="M7 17L17 7M17 7H7M17 7V17" />
+                            </svg>
+                        </div>
+                        <p class="project-description">
+                            Simulated and designed a four-stage audio amplifier to amplify a 5 mV–10 mV input signal to
+                            a 2V–4V output, suitable for driving a 0.5 W speaker. Focused on achieving low Total
+                            Harmonic Distortion (THD) with simulations performed using LTSpice.
+                        </p>
+                        <div class="project-tech">
+                            <span>LTSpice</span>
+                            <span>Analog Design</span>
+                            <span>Circuit Design</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Quadrature Down Converter -->
+                <a href="https://github.com/vroon33/Quadrature-Down-Converter" target="_blank"
+                    style="text-decoration: none;">
+                    <div class="project-card reveal">
+                        <div class="project-title">
+                            Quadrature Down Converter
+                            <svg class="project-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="M7 17L17 7M17 7H7M17 7V17" />
+                            </svg>
+                        </div>
+                        <p class="project-description">
+                            Designed a Quadrature Down Converter which included a Quadrature Oscillator, Mixer and a
+                            Filter. Carried out simulations using LTSpice and built the circuit on a breadboard using
+                            various components like MOSFETs, Op Amps and passive elements.
+                        </p>
+                        <div class="project-tech">
+                            <span>LTSpice</span>
+                            <span>Filter Design</span>
+                            <span>Analog Circuits</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <section id="contact" style="padding: 4rem 2rem; max-width: 800px; margin: 0 auto; text-align: center;">
+            <h2 class="reveal" style="font-size: 2rem; margin-bottom: 3rem; color: #5b21b6;">Connect With Me</h2>
+            <div class="social-icons reveal">
+                <!-- GitHub -->
+                <a href="https://www.github.com/vroon33/" target="_blank" rel="noopener noreferrer" class="social-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
+                </a>
+
+                <!-- LinkedIn -->
+                <a href="https://www.linkedin.com/in/varun-shastry05/" target="_blank" rel="noopener noreferrer"
+                    class="social-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                    </svg>
+                </a>
+
+                <!-- Email -->
+                <a href="mailto:varun.shastry@research.iiit.ac.in" class="social-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z" />
+                    </svg>
+                </a>
+
+                <!-- Instagram -->
+                <a href="https://www.instagram.com/varuns.05/" target="_blank" rel="noopener noreferrer"
+                    class="social-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                    </svg>
+                </a>
             </div>
         </section>
     </main>
-
-    <footer>
-        <div class="social-links">
-            <a href="https://github.com/vroon33"><i class="fab fa-github"></i></a>
-            <a href="https://www.linkedin.com/in/varun-shastry05"><i class="fab fa-linkedin"></i></a>
-            <a href="mailto:varun.shastry@research.iiit.ac.in"><i class="fas fa-envelope"></i></a>
-            <a href="https://www.instagram.com/varuns.05/"><i class="fab fa-instagram"></i></a>
-        </div>
-        <p>&copy; 2024 Varun Shastry. All rights reserved.</p>
-    </footer>
 
     <script src="js/script.js"></script>
     <script>
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
 
-        // Apply saved theme on page load
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
             body.classList.add(savedTheme);
@@ -111,9 +797,283 @@
                 localStorage.setItem('theme', 'dark-mode');
             } else {
                 body.classList.remove('dark-mode');
-                localStorage.setItem('theme', 'light-mode');
+                localStorage.setItem('theme', '');
             }
         });
+    </script>
+
+    <script>
+        // Hide/show navigation on scroll
+        document.addEventListener('DOMContentLoaded', () => {
+            let lastScrollY = 0;
+            let ticking = false;
+            const nav = document.querySelector('nav');
+
+            function updateNavbar() {
+                const scrollY = window.scrollY;
+
+                // Add scrolled class for shadow effect
+                if (scrollY > 50) {
+                    nav.classList.add('scrolled');
+                } else {
+                    nav.classList.remove('scrolled');
+                }
+
+                // Hide/show navbar based on scroll direction
+                if (scrollY > lastScrollY && scrollY > 100) {
+                    // Scrolling down & past threshold
+                    nav.classList.add('nav-hidden');
+                } else if (scrollY < lastScrollY) {
+                    // Scrolling up
+                    nav.classList.remove('nav-hidden');
+                }
+
+                lastScrollY = scrollY;
+                ticking = false;
+            }
+
+            function onScroll() {
+                if (!ticking) {
+                    window.requestAnimationFrame(updateNavbar);
+                    ticking = true;
+                }
+            }
+
+            window.addEventListener('scroll', onScroll);
+        });
+    </script>
+
+    <script>
+        // Ensure page loads at the top
+        window.scrollTo(0, 0);
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+
+        // Scribble Animation on Scroll (Apple-style)
+        (function() {
+            const path = document.getElementById("scribblePath");
+            if (!path) return;
+            
+            const totalLength = path.getTotalLength();
+            path.style.strokeDasharray = totalLength;
+            path.style.strokeDashoffset = totalLength;
+
+            function updateScribble() {
+                const wrapper = document.querySelector(".scribble-wrapper");
+                if (!wrapper) return;
+                
+                const rect = wrapper.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+
+                // Start when word enters viewport, complete when it's centered
+                const progress = Math.min(
+                    Math.max((windowHeight - rect.top) / windowHeight, 0),
+                    1
+                );
+
+                path.style.strokeDashoffset = totalLength * (1 - progress);
+            }
+
+            window.addEventListener("scroll", updateScribble);
+            updateScribble(); // Initial check
+        })();
+
+        // Highlight text animation on scroll
+        (function() {
+            const highlightElement = document.querySelector('.highlight-text');
+            if (!highlightElement) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Add visible class with a slight delay for better effect
+                        setTimeout(() => {
+                            entry.target.classList.add('visible');
+                        }, 300);
+                    }
+                });
+            }, {
+                threshold: 0.5, // Trigger when 50% visible
+                rootMargin: '0px'
+            });
+
+            observer.observe(highlightElement);
+        })();
+
+        // F1 Track Animation with realistic lap times
+        const circuits = [
+            {
+                name: 'Interlagos', file: 'RaceCircuitInterlagos.svg', lapTime: 110, corners: [
+                    { start: 0.05, end: 0.12 }, { start: 0.18, end: 0.25 }, { start: 0.35, end: 0.42 },
+                    { start: 0.52, end: 0.58 }, { start: 0.68, end: 0.75 }, { start: 0.85, end: 0.92 }
+                ]
+            },
+            {
+                name: 'Monaco', file: 'RaceCircuitMonaco.svg', lapTime: 115, reverse: true, corners: [
+                    { start: 0.1, end: 0.18 }, { start: 0.25, end: 0.35 }, { start: 0.42, end: 0.52 },
+                    { start: 0.58, end: 0.68 }, { start: 0.75, end: 0.85 }
+                ]
+            },
+            {
+                name: 'Bahrain', file: 'RaceCircuitBahrain.svg', lapTime: 140, reverse: true, corners: [
+                    { start: 0.08, end: 0.15 }, { start: 0.25, end: 0.32 }, { start: 0.42, end: 0.50 },
+                    { start: 0.62, end: 0.70 }, { start: 0.82, end: 0.90 }
+                ]
+            },
+            {
+                name: 'RedBull', file: 'RaceCircuitRedBull.svg', lapTime: 105, reverse: true, corners: [
+                    { start: 0.08, end: 0.15 }, { start: 0.28, end: 0.35 }, { start: 0.48, end: 0.55 },
+                    { start: 0.68, end: 0.75 }, { start: 0.88, end: 0.95 }
+                ]
+            },
+            {
+                name: 'Shanghai', file: 'RaceCircuitShanghai.svg', lapTime: 145, reverse: true, corners: [
+                    { start: 0.1, end: 0.18 }, { start: 0.3, end: 0.38 }, { start: 0.5, end: 0.58 },
+                    { start: 0.7, end: 0.78 }, { start: 0.88, end: 0.95 }
+                ]
+            },
+            {
+                name: 'Silverstone', file: 'RaceCircuitSilverstone.svg', lapTime: 135, reverse: true, corners: [
+                    { start: 0.08, end: 0.15 }, { start: 0.25, end: 0.32 }, { start: 0.45, end: 0.52 },
+                    { start: 0.65, end: 0.72 }, { start: 0.85, end: 0.92 }
+                ]
+            },
+            {
+                name: 'Spa', file: 'RaceCircuitSpa.svg', lapTime: 160, reverse: true, corners: [
+                    { start: 0.05, end: 0.12 }, { start: 0.22, end: 0.30 }, { start: 0.42, end: 0.50 },
+                    { start: 0.62, end: 0.70 }, { start: 0.82, end: 0.90 }
+                ]
+            }
+        ];
+
+        // Select random circuit
+        const selectedCircuit = circuits[Math.floor(Math.random() * circuits.length)];
+
+        // Iterate through all circuits (commented out)
+        // let currentCircuitIndex = parseInt(localStorage.getItem('circuitIndex') || '0');
+        // const selectedCircuit = circuits[currentCircuitIndex];
+        // currentCircuitIndex = (currentCircuitIndex + 1) % circuits.length;
+        // localStorage.setItem('circuitIndex', currentCircuitIndex.toString());
+
+        // Load selected circuit SVG
+        fetch(`images/${selectedCircuit.file}`)
+            .then(response => response.text())
+            .then(svgText => {
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+                const svgElement = svgDoc.querySelector('svg');
+                const pathElement = svgDoc.querySelector('path');
+
+                if (svgElement && pathElement) {
+                    // Update track SVG
+                    const trackSvg = document.querySelector('.f1-track');
+                    trackSvg.setAttribute('viewBox', svgElement.getAttribute('viewBox'));
+
+                    // Apply circuit-specific scaling
+                    if (selectedCircuit.name === 'Monaco') {
+                        trackSvg.style.width = '75%';
+                        trackSvg.style.height = '75%';
+                        trackSvg.style.maxWidth = '1200px';
+                        trackSvg.style.maxHeight = '1200px';
+                        trackSvg.style.transform = 'rotate(0deg) translateY(-5%)';
+                    } else if (selectedCircuit.name === 'Bahrain') {
+                        trackSvg.style.width = '80%';
+                        trackSvg.style.height = '80%';
+                        trackSvg.style.maxWidth = '950px';
+                        trackSvg.style.maxHeight = '950px';
+                        trackSvg.style.transform = 'rotate(0deg) translateY(-10%)';
+                    } else if (selectedCircuit.name === 'RedBull') {
+                        trackSvg.style.width = '70%';
+                        trackSvg.style.height = '70%';
+                        trackSvg.style.maxWidth = '1000px';
+                        trackSvg.style.maxHeight = '1000px';
+                        trackSvg.style.transform = 'rotate(0deg) translateY(-6%)';
+                    } else if (selectedCircuit.name === 'Shanghai') {
+                        trackSvg.style.width = '80%';
+                        trackSvg.style.height = '80%';
+                        trackSvg.style.maxWidth = '900px';
+                        trackSvg.style.maxHeight = '900px';
+                        trackSvg.style.transform = 'rotate(0deg) translateY(-8%)';
+                    } else if (selectedCircuit.name === 'Silverstone') {
+                        trackSvg.style.width = '65%';
+                        trackSvg.style.height = '65%';
+                        trackSvg.style.maxWidth = '950px';
+                        trackSvg.style.maxHeight = '950px';
+                        trackSvg.style.transform = 'rotate(150deg)';
+                    } else if (selectedCircuit.name === 'Spa') {
+                        trackSvg.style.width = '70%';
+                        trackSvg.style.height = '70%';
+                        trackSvg.style.maxWidth = '1000px';
+                        trackSvg.style.maxHeight = '1000px';
+                        trackSvg.style.transform = 'rotate(0deg)';
+                    } else {
+                        trackSvg.style.width = '95%';
+                        trackSvg.style.height = '95%';
+                        trackSvg.style.maxWidth = '1250px';
+                        trackSvg.style.maxHeight = '1250px';
+                        trackSvg.style.transform = 'rotate(90deg)';
+                    }
+
+                    const trackPath = document.getElementById('trackPath');
+                    trackPath.setAttribute('d', pathElement.getAttribute('d'));
+
+                    // Scroll to top after loading
+                    window.scrollTo(0, 0);
+
+                    // Initialize animation
+                    initAnimation(selectedCircuit);
+                }
+            });
+
+        function initAnimation(circuit) {
+            const path = document.getElementById('trackPath');
+            const car = document.getElementById('racingDot');
+
+            if (path && car) {
+                const pathLength = path.getTotalLength();
+                let progress = circuit.reverse ? pathLength : 0;
+
+                // Calculate speed for realistic lap time (in seconds)
+                // Speed per frame at 60fps: pathLength / (lapTime * 60)
+                const targetLapTime = circuit.lapTime; // seconds
+                const framesPerLap = targetLapTime * 60; // 60fps
+                const baseSpeed = pathLength / framesPerLap;
+                const speedDirection = circuit.reverse ? -1 : 1;
+
+                function animate() {
+                    const pNorm = progress / pathLength;
+
+                    let speedMultiplier = 1.0;
+
+                    // Smooth corner slow-down
+                    for (const zone of circuit.corners) {
+                        if (pNorm >= zone.start && pNorm <= zone.end) {
+                            const mid = (zone.start + zone.end) / 2;
+                            const width = (zone.end - zone.start) / 2;
+
+                            // Smooth braking curve
+                            const distanceFromCenter = Math.abs(pNorm - mid);
+                            const normalized = distanceFromCenter / width;
+
+                            speedMultiplier = 0.45 + 0.55 * normalized;
+                            break;
+                        }
+                    }
+
+                    const speed = baseSpeed * speedMultiplier;
+                    progress = (progress + speed * speedDirection + pathLength) % pathLength;
+
+                    const point = path.getPointAtLength(progress);
+                    car.setAttribute("cx", point.x);
+                    car.setAttribute("cy", point.y);
+
+                    requestAnimationFrame(animate);
+                }
+
+                animate();
+            }
+        }
     </script>
 </body>
 
