@@ -524,9 +524,10 @@
         <!-- Inspirational Quote Section -->
         <section class="quote-section reveal">
             <p class="quote">
-                "Never give up. <span class="highlight-text">Keep pushing</span>."
+                "The easiest thing in life is to give up. The hardest thing is to continue, to <span
+                    class="highlight-text">keep going</span>."
             </p>
-            <p class="quote-author">— Max Verstappen</p>
+            <p class="quote-author">— Lewis Hamilton</p>
         </section>
 
         <section id="education" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto;">
@@ -968,87 +969,87 @@
         //     window.scrollTo(0, 0);
         //     initAnimation(selectedCircuit);
         // } else {
-            // Load selected circuit SVG
-            fetch(`images/${selectedCircuit.file}`)
-                .then(response => response.text())
-                .then(svgText => {
-                    const parser = new DOMParser();
-                    const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-                    const svgElement = svgDoc.querySelector('svg');
-                    const pathElement = svgDoc.querySelector('path');
+        // Load selected circuit SVG
+        fetch(`images/${selectedCircuit.file}`)
+            .then(response => response.text())
+            .then(svgText => {
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+                const svgElement = svgDoc.querySelector('svg');
+                const pathElement = svgDoc.querySelector('path');
 
-                    if (svgElement && pathElement) {
-                        // Update track SVG
-                        const trackSvg = document.querySelector('.f1-track');
-                        trackSvg.setAttribute('viewBox', svgElement.getAttribute('viewBox'));
-
-                        // Apply circuit-specific scaling
-                        if (selectedCircuit.name === 'Monaco') {
-                            trackSvg.style.width = '75%';
-                            trackSvg.style.height = '75%';
-                            trackSvg.style.maxWidth = '1200px';
-                            trackSvg.style.maxHeight = '1200px';
-                            trackSvg.style.transform = 'rotate(0deg) translateY(-5%)';
-                        } else if (selectedCircuit.name === 'Bahrain') {
-                            trackSvg.style.width = '80%';
-                            trackSvg.style.height = '80%';
-                            trackSvg.style.maxWidth = '950px';
-                            trackSvg.style.maxHeight = '950px';
-                            trackSvg.style.transform = 'rotate(0deg) translateY(-10%)';
-                        } else if (selectedCircuit.name === 'RedBull') {
-                            trackSvg.style.width = '70%';
-                            trackSvg.style.height = '70%';
-                            trackSvg.style.maxWidth = '1000px';
-                            trackSvg.style.maxHeight = '1000px';
-                            trackSvg.style.transform = 'rotate(0deg) translateY(-6%)';
-                        } else if (selectedCircuit.name === 'Shanghai') {
-                            trackSvg.style.width = '80%';
-                            trackSvg.style.height = '80%';
-                            trackSvg.style.maxWidth = '900px';
-                            trackSvg.style.maxHeight = '900px';
-                            trackSvg.style.transform = 'rotate(0deg) translateY(-8%)';
-                        } else if (selectedCircuit.name === 'Silverstone') {
-                            trackSvg.style.width = '65%';
-                            trackSvg.style.height = '65%';
-                            trackSvg.style.maxWidth = '950px';
-                            trackSvg.style.maxHeight = '950px';
-                            trackSvg.style.transform = 'rotate(150deg)';
-                        } else if (selectedCircuit.name === 'Spa') {
-                            trackSvg.style.width = '70%';
-                            trackSvg.style.height = '70%';
-                            trackSvg.style.maxWidth = '1000px';
-                            trackSvg.style.maxHeight = '1000px';
-                            trackSvg.style.transform = 'rotate(0deg)';
-                        } else {
-                            trackSvg.style.width = '95%';
-                            trackSvg.style.height = '95%';
-                            trackSvg.style.maxWidth = '1250px';
-                            trackSvg.style.maxHeight = '1250px';
-                            trackSvg.style.transform = 'rotate(90deg)';
-                        }
-
-                        const trackPath = document.getElementById('trackPath');
-                        trackPath.setAttribute('d', pathElement.getAttribute('d'));
-
-                        // Scroll to top after loading
-                        window.scrollTo(0, 0);
-
-                        // Initialize animation
-                        initAnimation(selectedCircuit);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading circuit:', error);
-                    // Fallback to embedded Interlagos if loading fails
+                if (svgElement && pathElement) {
+                    // Update track SVG
                     const trackSvg = document.querySelector('.f1-track');
-                    trackSvg.style.width = '95%';
-                    trackSvg.style.height = '95%';
-                    trackSvg.style.maxWidth = '1250px';
-                    trackSvg.style.maxHeight = '1250px';
-                    trackSvg.style.transform = 'rotate(90deg)';
+                    trackSvg.setAttribute('viewBox', svgElement.getAttribute('viewBox'));
+
+                    // Apply circuit-specific scaling
+                    if (selectedCircuit.name === 'Monaco') {
+                        trackSvg.style.width = '75%';
+                        trackSvg.style.height = '75%';
+                        trackSvg.style.maxWidth = '1200px';
+                        trackSvg.style.maxHeight = '1200px';
+                        trackSvg.style.transform = 'rotate(0deg) translateY(-5%)';
+                    } else if (selectedCircuit.name === 'Bahrain') {
+                        trackSvg.style.width = '80%';
+                        trackSvg.style.height = '80%';
+                        trackSvg.style.maxWidth = '950px';
+                        trackSvg.style.maxHeight = '950px';
+                        trackSvg.style.transform = 'rotate(0deg) translateY(-10%)';
+                    } else if (selectedCircuit.name === 'RedBull') {
+                        trackSvg.style.width = '70%';
+                        trackSvg.style.height = '70%';
+                        trackSvg.style.maxWidth = '1000px';
+                        trackSvg.style.maxHeight = '1000px';
+                        trackSvg.style.transform = 'rotate(0deg) translateY(-6%)';
+                    } else if (selectedCircuit.name === 'Shanghai') {
+                        trackSvg.style.width = '80%';
+                        trackSvg.style.height = '80%';
+                        trackSvg.style.maxWidth = '900px';
+                        trackSvg.style.maxHeight = '900px';
+                        trackSvg.style.transform = 'rotate(0deg) translateY(-8%)';
+                    } else if (selectedCircuit.name === 'Silverstone') {
+                        trackSvg.style.width = '65%';
+                        trackSvg.style.height = '65%';
+                        trackSvg.style.maxWidth = '950px';
+                        trackSvg.style.maxHeight = '950px';
+                        trackSvg.style.transform = 'rotate(150deg)';
+                    } else if (selectedCircuit.name === 'Spa') {
+                        trackSvg.style.width = '70%';
+                        trackSvg.style.height = '70%';
+                        trackSvg.style.maxWidth = '1000px';
+                        trackSvg.style.maxHeight = '1000px';
+                        trackSvg.style.transform = 'rotate(0deg)';
+                    } else {
+                        trackSvg.style.width = '95%';
+                        trackSvg.style.height = '95%';
+                        trackSvg.style.maxWidth = '1250px';
+                        trackSvg.style.maxHeight = '1250px';
+                        trackSvg.style.transform = 'rotate(90deg)';
+                    }
+
+                    const trackPath = document.getElementById('trackPath');
+                    trackPath.setAttribute('d', pathElement.getAttribute('d'));
+
+                    // Scroll to top after loading
                     window.scrollTo(0, 0);
-                    initAnimation(circuits[0]);
-                });
+
+                    // Initialize animation
+                    initAnimation(selectedCircuit);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading circuit:', error);
+                // Fallback to embedded Interlagos if loading fails
+                const trackSvg = document.querySelector('.f1-track');
+                trackSvg.style.width = '95%';
+                trackSvg.style.height = '95%';
+                trackSvg.style.maxWidth = '1250px';
+                trackSvg.style.maxHeight = '1250px';
+                trackSvg.style.transform = 'rotate(90deg)';
+                window.scrollTo(0, 0);
+                initAnimation(circuits[0]);
+            });
         // }
 
         function initAnimation(circuit) {
