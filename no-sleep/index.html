@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stay awake</title>
+    <meta name="description" content="Keep the screen from sleeping, using the browser's Wake Lock API.">
+    <link rel="icon" href="../images/circle_pfp.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=STIX+Two+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../assets/tools.css">
+    <script>
+        /* Apply the saved theme before the first paint, so there is no flash. */
+        (function () {
+            try {
+                var t = localStorage.getItem('tools-theme');
+                if (t === 'light' || t === 'dark') {
+                    document.documentElement.setAttribute('data-theme', t);
+                }
+            } catch (e) { }
+        })();
+    </script>
+</head>
+
+<body>
+    <button class="themebtn" id="themebtn" type="button" aria-label="Switch between auto, light and dark">
+        <span class="ico" aria-hidden="true">◐</span><span class="lbl">Auto</span>
+    </button>
+
+    <div class="wrap">
+        <header>
+            <h1>Stay awake</h1>
+            <p class="lede">Stops the screen going to sleep while this tab is open. Useful for reading something long,
+                watching a dashboard, or following a recipe with your hands full.</p>
+            <p class="pill"><span class="dot"></span>browser wake lock, no extension needed</p>
+        </header>
+
+        <div class="msg" id="unsupported" hidden>
+            This browser does not support the Wake Lock API, so this page cannot keep your screen on. It works in
+            Chrome, Edge, Opera and Safari 16.4 or newer. It also needs an https address, which this page has.
+        </div>
+
+        <section id="tool">
+            <div class="live" id="live">
+                <span class="dot"></span>
+                <span class="state" id="stateLabel">Off</span>
+                <span class="elapsed" id="elapsed">0:00</span>
+            </div>
+
+            <div class="step">
+                <button class="btn" id="toggle" type="button">Keep screen awake</button>
+                <div class="status" id="status">The screen sleeps as usual right now.</div>
+            </div>
+
+            <div class="step">
+                <h2>Stop after</h2>
+                <p class="hint">Leave it on no limit and it runs until you turn it off or close the tab.</p>
+                <div class="chips" id="chips">
+                    <label class="chip"><input type="radio" name="limit" value="0" checked>No limit</label>
+                    <label class="chip"><input type="radio" name="limit" value="15">15 min</label>
+                    <label class="chip"><input type="radio" name="limit" value="30">30 min</label>
+                    <label class="chip"><input type="radio" name="limit" value="60">1 hour</label>
+                    <label class="chip"><input type="radio" name="limit" value="120">2 hours</label>
+                    <label class="chip"><input type="radio" name="limit" value="custom">Custom</label>
+                </div>
+                <div class="custom" id="customWrap" hidden>
+                    <label for="customMins">Stop after</label>
+                    <input type="number" id="customMins" min="1" max="1440" step="1" value="45">
+                    <span>minutes</span>
+                </div>
+            </div>
+
+            <div class="step">
+                <h2>What it does</h2>
+                <p class="hint">The browser drops the lock whenever you switch to another tab or minimise the window.
+                    That is how the API works, and there is no way around it. This page notices and takes the lock
+                    back as soon as you return, so you can leave it running. The line below tracks that.</p>
+                <ul class="log" id="log"></ul>
+            </div>
+        </section>
+
+        <footer>
+            <span>Uses the browser's Wake Lock API. Nothing is uploaded.</span>
+            <span><a href="../pdf-tools/">PDF tools</a></span>
+        </footer>
+    </div>
+
+    <script src="../assets/theme.js"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            var $ = function (id) { return document.getElementById(id); };
+            var live = $('live');
+            var stateLabel = $('stateLabel');
+            var elapsedEl = $('elapsed');
+            var toggle = $('toggle');
+            var status = $('status');
+            var logEl = $('log');
+
+            if (!('wakeLock' in navigator)) {
+                $('unsupported').hidden = false;
+                $('tool').hidden = true;
+                return;
+            }
+
+            var lock = null;        /* the live WakeLockSentinel, if we hold one */
+            var wanted = false;     /* what the user asked for */
+            var startedAt = 0;      /* when they switched it on */
+            var limitMs = 0;        /* 0 means run until told to stop */
+            var ticker = null;
+
+            function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+            function clock(ms) {
+                var s = Math.max(0, Math.floor(ms / 1000));
+                var h = Math.floor(s / 3600);
+                var m = Math.floor((s % 3600) / 60);
+                var sec = s % 60;
+                return h ? h + ':' + pad(m) + ':' + pad(sec) : m + ':' + pad(sec);
+            }
+
+            function log(text) {
+                var li = document.createElement('li');
+                var when = new Date();
+                var b = document.createElement('b');
+                b.textContent = pad(when.getHours()) + ':' + pad(when.getMinutes()) + ':' +
+                    pad(when.getSeconds());
+                var what = document.createElement('span');
+                what.textContent = text;
+                li.appendChild(b);
+                li.appendChild(what);
+                logEl.insertBefore(li, logEl.firstChild);
+                while (logEl.children.length > 6) logEl.removeChild(logEl.lastChild);
+            }
+
+            function paint() {
+                var held = !!lock;
+                live.classList.toggle('on', wanted && held);
+                live.classList.toggle('paused', wanted && !held);
+
+                if (!wanted) {
+                    stateLabel.textContent = 'Off';
+                    toggle.textContent = 'Keep screen awake';
+                } else if (held) {
+                    stateLabel.textContent = 'On, screen will stay awake';
+                    toggle.textContent = 'Sleep prevention on, click to stop';
+                } else {
+                    stateLabel.textContent = 'Paused, this tab is in the background';
+                    toggle.textContent = 'Sleep prevention on, click to stop';
+                }
+
+                if (!wanted) {
+                    elapsedEl.textContent = '0:00';
+                    return;
+                }
+                var ran = Date.now() - startedAt;
+                elapsedEl.textContent = limitMs
+                    ? clock(ran) + ' / ' + clock(limitMs)
+                    : clock(ran);
+            }
+
+            async function acquire(quiet) {
+                try {
+                    lock = await navigator.wakeLock.request('screen');
+                    lock.addEventListener('release', onRelease);
+                    if (!quiet) log('lock acquired');
+                    paint();
+                    return true;
+                } catch (err) {
+                    lock = null;
+                    wanted = false;
+                    stopTicker();
+                    paint();
+                    /* Usually the battery saver, or a request without a click. */
+                    status.textContent = 'The browser refused the lock. ' +
+                        (err && err.message ? err.message : String(err));
+                    status.classList.add('err');
+                    log('refused');
+                    return false;
+                }
+            }
+
+            function onRelease() {
+                lock = null;
+                paint();
+                if (!wanted) return;
+                log('lock dropped by the browser');
+                if (document.visibilityState === 'visible') {
+                    /* Rare, but take it straight back if we are still on screen. */
+                    acquire(true);
+                } else {
+                    status.textContent = 'Paused while this tab is in the background. ' +
+                        'It picks up again when you come back.';
+                    status.classList.remove('err');
+                }
+            }
+
+            function startTicker() {
+                stopTicker();
+                ticker = setInterval(function () {
+                    if (!wanted) return;
+                    if (limitMs && Date.now() - startedAt >= limitMs) {
+                        stop('Time is up. The screen can sleep again after ' + clock(limitMs) + '.');
+                        return;
+                    }
+                    paint();
+                }, 1000);
+            }
+
+            function stopTicker() {
+                if (ticker) { clearInterval(ticker); ticker = null; }
+            }
+
+            async function release() {
+                if (!lock) return;
+                var l = lock;
+                lock = null;
+                try { await l.release(); } catch (e) { }
+            }
+
+            async function start() {
+                limitMs = readLimit();
+                wanted = true;
+                startedAt = Date.now();
+                status.classList.remove('err');
+                status.textContent = limitMs
+                    ? 'On. It stops on its own after ' + clock(limitMs) + '.'
+                    : 'On. It runs until you stop it or close this tab.';
+                paint();
+                var ok = await acquire(false);
+                if (ok) startTicker();
+            }
+
+            async function stop(message) {
+                wanted = false;
+                stopTicker();
+                await release();
+                paint();
+                status.classList.remove('err');
+                status.textContent = message || 'Off. The screen sleeps as usual again.';
+                log('stopped');
+            }
+
+            toggle.addEventListener('click', function () {
+                if (wanted) stop(); else start();
+            });
+
+            /* The lock always dies when the tab is hidden, so take it back. */
+            document.addEventListener('visibilitychange', function () {
+                if (!wanted) return;
+                if (document.visibilityState === 'visible' && !lock) {
+                    acquire(false).then(function (ok) {
+                        if (ok) {
+                            status.classList.remove('err');
+                            status.textContent = limitMs
+                                ? 'Back on. It stops on its own after ' + clock(limitMs) + '.'
+                                : 'Back on. It runs until you stop it or close this tab.';
+                        }
+                    });
+                }
+                paint();
+            });
+
+            /* Let it go cleanly when the page is closed or navigated away from. */
+            window.addEventListener('pagehide', function () {
+                wanted = false;
+                stopTicker();
+                release();
+            });
+
+            /* ---- the stop-after choice ---- */
+            function readLimit() {
+                var picked = document.querySelector('input[name="limit"]:checked').value;
+                if (picked === 'custom') {
+                    var mins = parseInt($('customMins').value, 10);
+                    if (!mins || mins < 1) mins = 1;
+                    return mins * 60000;
+                }
+                return parseInt(picked, 10) * 60000;
+            }
+
+            function limitChanged() {
+                $('customWrap').hidden =
+                    document.querySelector('input[name="limit"]:checked').value !== 'custom';
+                if (!wanted) return;
+                limitMs = readLimit();
+                if (limitMs && Date.now() - startedAt >= limitMs) {
+                    stop('That limit has already passed, so it stopped.');
+                    return;
+                }
+                status.classList.remove('err');
+                status.textContent = limitMs
+                    ? 'Limit changed. It now stops ' + clock(limitMs) + ' after you switched it on.'
+                    : 'Limit removed. It runs until you stop it or close this tab.';
+                paint();
+            }
+
+            $('chips').addEventListener('change', limitChanged);
+            $('customMins').addEventListener('input', function () {
+                if (document.querySelector('input[name="limit"]:checked').value === 'custom') {
+                    limitChanged();
+                }
+            });
+
+            paint();
+        })();
+    </script>
+</body>
+
+</html>

@@ -7,515 +7,35 @@
     <title>PDF tools</title>
     <meta name="description" content="Image to PDF, PDF compression and PDF merging. Everything runs in your browser.">
     <link rel="icon" href="../images/circle_pfp.png" type="image/png">
-    <style>
-        :root {
-            --bg: #ffffff;
-            --bg-soft: #f5f5f7;
-            --text: #1d1d1f;
-            --text-2: #6e6e73;
-            --text-3: #86868b;
-            --line: #d2d2d7;
-            --line-soft: #e8e8ed;
-            --accent: #0071e3;
-            --accent-dark: #0058b8;
-            --error: #b3261e;
-            --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: var(--font);
-            font-size: 15px;
-            line-height: 1.55;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .wrap {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 28px 120px;
-        }
-
-        /* ---------- header ---------- */
-        header {
-            padding: 72px 0 40px;
-        }
-
-        h1 {
-            font-size: 34px;
-            font-weight: 600;
-            letter-spacing: -.02em;
-            margin: 20px 0 12px;
-        }
-
-        .lede {
-            color: var(--text-2);
-            max-width: 60ch;
-        }
-
-        .note {
-            margin-top: 14px;
-            color: var(--text-3);
-            font-size: 13px;
-        }
-
-        /* ---------- tabs ---------- */
-        .tabs {
-            display: flex;
-            gap: 28px;
-            border-bottom: 1px solid var(--line);
-            margin-bottom: 44px;
-        }
-
-        .tab {
-            appearance: none;
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            font: inherit;
-            color: var(--text-2);
-            padding: 0 0 12px;
-            margin-bottom: -1px;
-            cursor: pointer;
-        }
-
-        .tab:hover {
-            color: var(--text);
-        }
-
-        .tab[aria-selected="true"] {
-            color: var(--text);
-            border-bottom-color: var(--text);
-        }
-
-        /* ---------- structure ---------- */
-        .panel[hidden] {
-            display: none;
-        }
-
-        .step+.step {
-            margin-top: 44px;
-            padding-top: 36px;
-            border-top: 1px solid var(--line-soft);
-        }
-
-        h2 {
-            font-size: 17px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .hint {
-            color: var(--text-2);
-            font-size: 13px;
-            margin-bottom: 18px;
-        }
-
-        .row {
-            display: flex;
-            gap: 14px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        /* ---------- drop area ---------- */
-        .drop {
-            border: 1px dashed var(--line);
-            background: var(--bg);
-            padding: 40px 24px;
-            text-align: center;
-            cursor: pointer;
-        }
-
-        .drop:hover,
-        .drop:focus-visible {
-            border-color: var(--text-3);
-            background: var(--bg-soft);
-            outline: none;
-        }
-
-        .drop.over {
-            border-color: var(--accent);
-            border-style: solid;
-            background: var(--bg-soft);
-        }
-
-        .drop p {
-            color: var(--text);
-        }
-
-        .drop p+p {
-            color: var(--text-3);
-            font-size: 13px;
-            margin-top: 6px;
-        }
-
-        input[type=file] {
-            display: none;
-        }
-
-        /* ---------- file rows ---------- */
-        ul.files {
-            list-style: none;
-            margin-top: 20px;
-            border-top: 1px solid var(--line-soft);
-        }
-
-        li.file {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 10px 2px;
-            border-bottom: 1px solid var(--line-soft);
-            font-size: 14px;
-        }
-
-        li.file[draggable=true] {
-            cursor: grab;
-        }
-
-        li.file.dragging {
-            opacity: .4;
-        }
-
-        li.file.dropbefore {
-            box-shadow: 0 -1px 0 var(--accent);
-        }
-
-        li.file.dropafter {
-            box-shadow: 0 1px 0 var(--accent);
-        }
-
-        li.file .num {
-            color: var(--text-3);
-            width: 22px;
-            flex: none;
-            font-variant-numeric: tabular-nums;
-        }
-
-        li.file .thumb {
-            width: 34px;
-            height: 34px;
-            object-fit: cover;
-            background: var(--bg-soft);
-            flex: none;
-        }
-
-        li.file .name {
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        li.file .meta {
-            color: var(--text-3);
-            font-size: 13px;
-            flex: none;
-        }
-
-        .mini {
-            appearance: none;
-            background: none;
-            border: none;
-            font: inherit;
-            font-size: 13px;
-            color: var(--text-2);
-            padding: 2px 6px;
-            cursor: pointer;
-            line-height: 1;
-        }
-
-        .mini:hover:not(:disabled) {
-            color: var(--accent);
-        }
-
-        .mini:disabled {
-            color: var(--line);
-            cursor: default;
-        }
-
-        /* ---------- options ---------- */
-        .opts {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .opt {
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
-            padding: 12px 2px;
-            border-bottom: 1px solid var(--line-soft);
-            cursor: pointer;
-        }
-
-        .opt:first-child {
-            border-top: 1px solid var(--line-soft);
-        }
-
-        .opt input {
-            appearance: none;
-            width: 15px;
-            height: 15px;
-            margin-top: 4px;
-            border: 1px solid var(--line);
-            border-radius: 50%;
-            flex: none;
-            cursor: pointer;
-        }
-
-        .opt input:checked {
-            border: 4px solid var(--accent);
-        }
-
-        .opt input:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-        }
-
-        .opt .d {
-            color: var(--text-2);
-            font-size: 13px;
-        }
-
-        /* ---------- buttons ---------- */
-        .btn {
-            appearance: none;
-            display: inline-block;
-            font: inherit;
-            font-size: 14px;
-            padding: 9px 18px;
-            border: 1px solid var(--accent);
-            background: var(--accent);
-            color: #fff;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .btn:hover:not(:disabled) {
-            background: var(--accent-dark);
-            border-color: var(--accent-dark);
-        }
-
-        .btn:disabled {
-            background: var(--bg-soft);
-            border-color: var(--line);
-            color: var(--text-3);
-            cursor: default;
-        }
-
-        .btn.secondary {
-            background: none;
-            border-color: var(--line);
-            color: var(--text);
-        }
-
-        .btn.secondary:hover:not(:disabled) {
-            background: var(--bg-soft);
-            border-color: var(--text-3);
-        }
-
-        /* ---------- progress and results ---------- */
-        .status {
-            margin-top: 16px;
-            font-size: 13px;
-            color: var(--text-2);
-            min-height: 20px;
-        }
-
-        .status.err {
-            color: var(--error);
-        }
-
-        .bar {
-            height: 2px;
-            background: var(--line-soft);
-            margin-top: 10px;
-        }
-
-        .bar i {
-            display: block;
-            height: 100%;
-            width: 0;
-            background: var(--accent);
-            transition: width .2s linear;
-        }
-
-        .result {
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid var(--line-soft);
-        }
-
-        .result[hidden] {
-            display: none;
-        }
-
-        .stats {
-            display: flex;
-            gap: 40px;
-            flex-wrap: wrap;
-            margin-bottom: 22px;
-        }
-
-        .stat .k {
-            font-size: 13px;
-            color: var(--text-3);
-        }
-
-        .stat .v {
-            font-size: 20px;
-            letter-spacing: -.01em;
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* ---------- page thumbnails ---------- */
-        .pages {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-            gap: 16px;
-            margin-top: 22px;
-        }
-
-        .pg {
-            position: relative;
-            cursor: grab;
-        }
-
-        .pg img,
-        .pg .ph {
-            display: block;
-            width: 100%;
-            aspect-ratio: 1 / 1.414;
-            object-fit: contain;
-            object-position: top;
-            background: var(--bg-soft);
-            border: 1px solid var(--line-soft);
-        }
-
-        .pg.dragging {
-            opacity: .4;
-        }
-
-        .pg.dropbefore img,
-        .pg.dropbefore .ph {
-            border-left: 2px solid var(--accent);
-        }
-
-        .pg.dropafter img,
-        .pg.dropafter .ph {
-            border-right: 2px solid var(--accent);
-        }
-
-        .pg .cap {
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-            font-size: 12px;
-            color: var(--text-3);
-            margin-top: 6px;
-        }
-
-        .pg .cap b {
-            color: var(--text);
-            font-weight: 400;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .pg .cap span {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .pg .kill {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            background: rgba(255, 255, 255, .92);
-            border: 1px solid var(--line);
-            color: var(--text-2);
-            font: inherit;
-            font-size: 12px;
-            line-height: 1;
-            padding: 3px 6px;
-            cursor: pointer;
-            opacity: 0;
-        }
-
-        .pg:hover .kill,
-        .pg .kill:focus-visible {
-            opacity: 1;
-        }
-
-        .pg .kill:hover {
-            color: var(--error);
-            border-color: var(--error);
-        }
-
-        footer {
-            margin-top: 72px;
-            padding-top: 20px;
-            border-top: 1px solid var(--line-soft);
-            display: flex;
-            justify-content: space-between;
-            gap: 16px;
-            flex-wrap: wrap;
-            font-size: 13px;
-            color: var(--text-3);
-        }
-
-        footer a {
-            color: var(--text-2);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            color: var(--text);
-        }
-
-        @media (max-width: 600px) {
-            .wrap {
-                padding: 0 20px 80px;
-            }
-
-            header {
-                padding: 44px 0 32px;
-            }
-
-            h1 {
-                font-size: 28px;
-            }
-
-            .tabs {
-                gap: 20px;
-            }
-
-            li.file .meta {
-                display: none;
-            }
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=STIX+Two+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../assets/tools.css">
+    <script>
+        /* Apply the saved theme before the first paint, so there is no flash. */
+        (function () {
+            try {
+                var t = localStorage.getItem('tools-theme');
+                if (t === 'light' || t === 'dark') {
+                    document.documentElement.setAttribute('data-theme', t);
+                }
+            } catch (e) { }
+        })();
+    </script>
 </head>
 
 <body>
+    <button class="themebtn" id="themebtn" type="button" aria-label="Switch between auto, light and dark">
+        <span class="ico" aria-hidden="true">◐</span><span class="lbl">Auto</span>
+    </button>
+
     <div class="wrap">
         <header>
             <h1>PDF tools</h1>
             <p class="lede">Three small things I kept needing. Photos into a PDF. A smaller PDF when it is mostly
                 scans. Several PDFs joined into one.</p>
-            <p class="note">Everything runs in your browser. Nothing is uploaded. There is no server here to upload
-                it to.</p>
+            <p class="pill"><span class="dot"></span>runs in your browser, nothing is uploaded</p>
         </header>
 
         <div class="tabs" role="tablist">
@@ -557,15 +77,14 @@
                     <label class="opt">
                         <input type="radio" name="pagesize" value="a4">
                         <span>Fit to A4
-                            <span class="d" style="display:block">595 by 842 pt. The image is scaled to fit, and centred.
-                                Wide images get a landscape page.</span></span>
+                            <span class="d" style="display:block"><span class="spec">595 × 842 pt</span>. The image is scaled to
+                                fit, and centred. Wide images get a landscape page.</span></span>
                     </label>
                 </div>
             </div>
 
             <div class="step">
                 <h2>Create</h2>
-                <p class="hint">&nbsp;</p>
                 <button class="btn" id="imgBuild" disabled>Create PDF</button>
                 <div class="status" id="imgStatus"></div>
                 <div class="bar" id="imgBarWrap" hidden><i id="imgBar"></i></div>
@@ -606,27 +125,26 @@
                     <label class="opt">
                         <input type="radio" name="level" value="minimal">
                         <span>Minimal
-                            <span class="d" style="display:block">150 DPI cap, quality 0.85. Still fine to print. Saves the
-                                least.</span></span>
+                            <span class="d" style="display:block"><span class="spec">150 DPI, q0.85</span>. Still fine to print.
+                                Saves the least.</span></span>
                     </label>
                     <label class="opt">
                         <input type="radio" name="level" value="recommended" checked>
                         <span>Recommended
-                            <span class="d" style="display:block">120 DPI cap, quality 0.7. Looks fine on screen. Good
-                                default.</span></span>
+                            <span class="d" style="display:block"><span class="spec">120 DPI, q0.70</span>. Looks fine on screen.
+                                A good default.</span></span>
                     </label>
                     <label class="opt">
                         <input type="radio" name="level" value="maximal">
                         <span>Maximal
-                            <span class="d" style="display:block">96 DPI cap, quality 0.5. Smallest file. Images look
-                                softer.</span></span>
+                            <span class="d" style="display:block"><span class="spec">96 DPI, q0.50</span>. Smallest file. Images
+                                look softer.</span></span>
                     </label>
                 </div>
             </div>
 
             <div class="step">
                 <h2>Compress</h2>
-                <p class="hint">&nbsp;</p>
                 <button class="btn" id="cmpRun" disabled>Compress</button>
                 <div class="status" id="cmpStatus"></div>
                 <div class="bar" id="cmpBarWrap" hidden><i id="cmpBar"></i></div>
@@ -684,7 +202,6 @@
 
             <div class="step">
                 <h2>Merge</h2>
-                <p class="hint">&nbsp;</p>
                 <button class="btn" id="mrgRun" disabled>Merge PDFs</button>
                 <div class="status" id="mrgStatus"></div>
                 <div class="bar" id="mrgBarWrap" hidden><i id="mrgBar"></i></div>
@@ -710,9 +227,11 @@
 
         <footer>
             <span>Built with pdf-lib and pdf.js. Runs entirely client-side.</span>
+            <span><a href="../no-sleep/">Stay awake</a></span>
         </footer>
     </div>
 
+    <script src="../assets/theme.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
