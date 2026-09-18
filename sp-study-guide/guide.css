@@ -90,13 +90,38 @@ nav.toc {
     scrollbar-width: thin;
 }
 
+nav.toc .toc-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
 nav.toc .toc-title {
     font-family: var(--mono);
     font-size: 11px;
     letter-spacing: .08em;
     text-transform: uppercase;
     color: var(--text-3);
-    margin-bottom: 12px;
+}
+
+.toc-hide {
+    appearance: none;
+    background: none;
+    border: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    color: var(--text-3);
+    padding: 2px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.toc-hide:hover {
+    color: var(--accent);
+    background: var(--bg-soft);
 }
 
 nav.toc ol {
@@ -146,17 +171,43 @@ nav.toc .progress i {
     background: var(--accent);
 }
 
-nav.toc .home {
-    display: block;
-    margin-top: 18px;
-    padding-left: 12px;
-    color: var(--text-3);
-    text-decoration: none;
-    font-size: 12.5px;
+/* ---------- hidden chapter list ---------- */
+.tocshow {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 20;
+    display: none;
+    align-items: center;
+    gap: 7px;
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: 999px;
+    color: var(--text-2);
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 6px 13px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
 }
 
-nav.toc .home:hover {
-    color: var(--accent);
+.tocshow:hover {
+    background: var(--bg-soft);
+    color: var(--text);
+}
+
+body.toc-off nav.toc {
+    display: none;
+}
+
+body.toc-off .tocshow {
+    display: inline-flex;
+}
+
+body.toc-off .page {
+    grid-template-columns: minmax(0, 820px);
+    justify-content: center;
+    max-width: 880px;
 }
 
 /* mobile TOC */
@@ -180,6 +231,24 @@ nav.toc .home:hover {
     nav.toc ol {
         display: none;
         margin-top: 8px;
+    }
+
+    /* the drop-down replaces the sidebar here, so nothing is hidden */
+    body.toc-off nav.toc {
+        display: block;
+    }
+
+    body.toc-off .tocshow {
+        display: none;
+    }
+
+    body.toc-off .page {
+        grid-template-columns: minmax(0, 1fr);
+        max-width: 1120px;
+    }
+
+    nav.toc .toc-head {
+        display: none;
     }
 
     nav.toc.open ol {
@@ -206,19 +275,6 @@ nav.toc .home:hover {
         cursor: pointer;
     }
 
-    nav.toc .home {
-        display: none;
-    }
-
-    /* the dot separators dangle at the end of a wrapped line */
-    .meta span:nth-child(even) {
-        display: none;
-    }
-
-    .meta {
-        gap: 4px 16px;
-    }
-
     body {
         font-size: 16px;
     }
@@ -242,16 +298,6 @@ article header h1 {
 article header .lede {
     font-size: 17px;
     max-width: 62ch;
-}
-
-.meta {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-top: 18px;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text-3);
 }
 
 section.ch {

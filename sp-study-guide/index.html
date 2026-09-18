@@ -35,10 +35,17 @@
         <span class="ico" aria-hidden="true">◐</span><span class="lbl">Auto</span>
     </button>
 
+    <button class="tocshow" id="tocShow" type="button" aria-label="Show the chapter list">
+        <span class="ico" aria-hidden="true">☰</span><span>Chapters</span>
+    </button>
+
     <div class="page">
         <nav class="toc" id="toc" aria-label="Chapters">
             <button class="toc-toggle" id="tocToggle" type="button" aria-expanded="false">☰ Chapters</button>
-            <div class="toc-title">Chapters</div>
+            <div class="toc-head">
+                <span class="toc-title">Chapters</span>
+                <button class="toc-hide" id="tocHide" type="button" aria-label="Hide the chapter list">hide</button>
+            </div>
             <ol>
                 <li><a href="#ch0"><span class="n">0</span>How to read this guide</a></li>
                 <li><a href="#ch1"><span class="n">1</span>Signals</a></li>
@@ -57,7 +64,6 @@
                 <li><a href="#refs"><span class="n">R</span>References</a></li>
             </ol>
             <div class="progress" aria-hidden="true"><i id="progress"></i></div>
-            <a class="home" href="../">← varun shastry</a>
         </nav>
 
         <article>
@@ -66,13 +72,6 @@
                 <p class="lede">A refresher that goes from signals and systems to the FFT. Read it from the start to the
                     end. Each chapter builds on the one before it. Every important result comes with its derivation.
                 </p>
-                <div class="meta">
-                    <span>13 chapters</span>
-                    <span>·</span>
-                    <span>continuous and discrete time</span>
-                    <span>·</span>
-                    <span>derivations included</span>
-                </div>
             </header>
 
             <!-- ============================================================ -->
@@ -3782,8 +3781,8 @@
                     work. First, pack two real signals into one complex signal \(z = x_1 + jx_2\), take one FFT, and separate
                     the results with the symmetry. Second, pack one real signal of length \(N\) into a complex signal of
                     length \(N/2\), with even samples as the real part and odd samples as the imaginary part, then fix up
-                    the result with one extra butterfly stage. TI's application note SPRA291 works through the second
-                    method in detail.</p>
+                    the result with one extra butterfly stage. The second method costs one extra butterfly stage and
+                    halves both the memory and the run time.</p>
 
                 <h4>Fixed point</h4>
                 <p>In a butterfly, \(|a + Wb| \le |a| + |b|\). The magnitude can double at every stage. Over \(\log_2 N\) stages
@@ -4073,17 +4072,6 @@
                         <span class="who">Links to more free DSP texts.</span></li>
                 </ul>
 
-                <h3>Texas Instruments material</h3>
-                <ul class="refs">
-                    <li>TI Precision Labs. <a href="https://www.ti.com/precisionlabs">ti.com/precisionlabs</a>. <span
-                            class="who">Short video courses. The ADC series covers sampling, aliasing, anti-aliasing
-                            filters, and quantization noise from a hardware point of view.</span></li>
-                    <li>TI application report SPRA291, <em>Implementing Fast Fourier Transform Algorithms of Real-Valued
-                            Sequences with the TMS320 DSP Platform</em>. <a
-                            href="https://www.ti.com/lit/an/spra291/spra291.pdf">ti.com/lit/an/spra291</a>. <span
-                            class="who">The real-input FFT tricks of section 12.12, with code.</span></li>
-                </ul>
-
                 <p style="margin-top:32px;color:var(--text-3);font-size:14px;">Compiled as a personal refresher. If you
                     find an error, the derivation is the place to check first.</p>
             </section>
@@ -4120,6 +4108,25 @@
             window.addEventListener('scroll', update, { passive: true });
             window.addEventListener('resize', update);
             update();
+
+            /* Hiding the chapter list gives the text the full width. The
+               choice is remembered, like the theme. */
+            var hide = document.getElementById('tocHide');
+            var show = document.getElementById('tocShow');
+
+            function setHidden(off) {
+                document.body.classList.toggle('toc-off', off);
+                try {
+                    if (off) localStorage.setItem('sp-toc', 'off');
+                    else localStorage.removeItem('sp-toc');
+                } catch (e) { }
+                update();
+            }
+
+            try { if (localStorage.getItem('sp-toc') === 'off') document.body.classList.add('toc-off'); } catch (e) { }
+
+            if (hide) hide.addEventListener('click', function () { setHidden(true); show.focus(); });
+            if (show) show.addEventListener('click', function () { setHidden(false); hide.focus(); });
 
             if (toggle) {
                 toggle.addEventListener('click', function () {
