@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Does PSNR Lie? study guide</title>
+    <meta name="description"
+        content="A start-to-end guide to a project on approximate image-processing hardware: why a fixed PSNR threshold cannot decide whether a cheap circuit is good enough, how 257 FPGA designs were built and scored on their tasks, and what was found.">
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="../images/circle_pfp.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.7/dist/katex.min.css"
+       >
+    <link rel="stylesheet" href="../assets/tools.css">
+    <link rel="stylesheet" href="guide.css">
+    <script>
+        /* Apply the saved theme before the first paint, so there is no flash. */
+        (function () {
+            try {
+                var t = localStorage.getItem('tools-theme');
+                if (t === 'light' || t === 'dark') {
+                    document.documentElement.setAttribute('data-theme', t);
+                }
+            } catch (e) { }
+        })();
+    </script>
+</head>
+
+<body>
+    <button class="themebtn" id="themebtn" type="button" aria-label="Switch between auto, light and dark">
+        <span class="ico" aria-hidden="true">◐</span><span class="lbl">Auto</span>
+    </button>
+
+    <button class="tocshow" id="tocShow" type="button" aria-label="Show the chapter list">
+        <span class="ico" aria-hidden="true">☰</span><span>Chapters</span>
+    </button>
+
+    <div class="page">
+        <nav class="toc" id="toc" aria-label="Chapters">
+            <button class="toc-toggle" id="tocToggle" type="button" aria-expanded="false">☰ Chapters</button>
+            <div class="toc-head">
+                <span class="toc-title">Chapters</span>
+                <button class="toc-hide" id="tocHide" type="button" aria-label="Hide the chapter list">hide</button>
+            </div>
+            <ol>
+                <li><a href="#ch0"><span class="n">0</span>How to read this guide</a></li>
+                <li><a href="#ch1"><span class="n">1</span>The problem</a></li>
+                <li><a href="#ch2"><span class="n">2</span>PSNR, SSIM and the peak</a></li>
+                <li><a href="#ch3"><span class="n">3</span>How a design is made cheaper</a></li>
+                <li><a href="#ch4"><span class="n">4</span>Operators and task metrics</a></li>
+                <li><a href="#ch5"><span class="n">5</span>Deciding that a design is safe</a></li>
+                <li><a href="#ch6"><span class="n">6</span>The hardware</a></li>
+                <li><a href="#ch7"><span class="n">7</span>How the experiments ran</a></li>
+                <li><a href="#ch8"><span class="n">8</span>How the claim changed</a></li>
+                <li><a href="#ch9"><span class="n">9</span>The results</a></li>
+                <li><a href="#ch10"><span class="n">10</span>Objectives and recommendations</a></li>
+                <li><a href="#ch11"><span class="n">11</span>Weak spots</a></li>
+                <li><a href="#ch12"><span class="n">12</span>Questions to practise</a></li>
+                <li><a href="#ch13"><span class="n">13</span>Glossary</a></li>
+            </ol>
+            <div class="progress" aria-hidden="true"><i id="progress"></i></div>
+        </nav>
+
+        <article>
+            <header>
+                <h1>Does PSNR Lie? study guide</h1>
+                <p class="lede">Approximate image-processing hardware, and why one PSNR number cannot tell you
+                    whether a cheap circuit is good enough.</p>
+            </header>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch0">
+                <div class="ch-num">Chapter 0</div>
+                <h2>How to read this guide</h2>
+
+                <p>This guide explains a digital image processing project from the problem to the results. It is
+                    written to prepare for a viva on the project and to read the paper that came out of it. Read
+                    Chapters 1 to 6 slowly, once. Chapters 7 to 9 tell what was run and what was found. Chapter 12
+                    has practice questions with hidden answers.</p>
+
+                <p>The guide uses four kinds of boxes.</p>
+
+                <div class="box def">
+                    <span class="tag">Definition</span>
+                    <p>A term stated exactly. Be able to say these in one sentence.</p>
+                </div>
+
+                <div class="box der">
+                    <span class="tag">Derivation</span>
+                    <p>Where a result comes from. Be able to redo these on a board.</p>
+                </div>
+
+                <div class="box ex">
+                    <span class="tag">Example</span>
+                    <p>A worked case with real numbers from the project.</p>
+                </div>
+
+                <div class="box note">
+                    <span class="tag">Note</span>
+                    <p>Context, a likely question, or a mistake to avoid.</p>
+                </div>
+
+                <p>The figures marked <em>data</em> are drawn from the project's result tables. Hover over a point
+                    (or tap it) to see which design it is.</p>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch1">
+                <div class="ch-num">Chapter 1</div>
+                <h2>The problem</h2>
+
+                <h3>Approximate hardware</h3>
+
+                <p>Image-processing hardware does many additions and multiplications per pixel. Exact arithmetic
+                    costs area and power. <strong>Approximate computing</strong> cuts corners on purpose:</p>
+                <ul>
+                    <li>drop a few low bits of a number (truncation or rounding);</li>
+                    <li>use fewer nonzero digits in a filter coefficient (CSD quantisation);</li>
+                    <li>replace an exact adder or multiplier with a cheaper circuit that is sometimes wrong, for
+                        example one from the EvoApproxLib library.</li>
+                </ul>
+                <p>The output is then slightly wrong, and the designer has to decide whether the error is
+                    acceptable.</p>
+
+                <h3>How designs are accepted today</h3>
+
+                <p>The usual check is the PSNR of the approximate output against the exact output. If the PSNR is
+                    above a fixed number, often 30 dB, the design is accepted. A survey done for this project found
+                    this directly:</p>
+                <ul>
+                    <li>of 22 approximate-arithmetic papers read in full, 16 report PSNR and 12 report SSIM;</li>
+                    <li>7 state a fixed acceptance threshold, and 4 of those use 30 dB;</li>
+                    <li>none compares edge maps with human ground truth, and none compares a pixel metric with a task
+                        metric on the same designs.</li>
+                </ul>
+
+                <h3>Why this might be wrong</h3>
+
+                <div class="box def">
+                    <span class="tag">Definition</span>
+                    <p>An output is <strong>field-valued</strong> when it is a signal that is used as a signal: a
+                        smoothed image, a set of DCT coefficients. A small arithmetic error gives a small output
+                        error.</p>
+                    <p>An output is <strong>decision-valued</strong> when it ends in a decision per pixel: edge or
+                        not, corner or not, which region. A small error does nothing unless it pushes a value across
+                        the threshold. Then the decision flips completely.</p>
+                </div>
+
+                <p>PSNR was made for field-valued outputs. For a decision-valued output, the same PSNR can mean
+                    "no harm" or "real harm", depending on where the errors fall. Figure 1.1 shows the idea.</p>
+
+                <figure>
+                    <div class="fig" id="fig-field"></div>
+                    <div class="legend"><span><i class="la"></i>exact signal</span><span><i class="lb"></i>exact
+                            plus a small error</span><span><i class="ld"></i>threshold T</span><span><span
+                                class="mk flip"></span>flipped decision</span></div>
+                    <figcaption><b>Figure 1.1.</b> The same small error added everywhere. As a field (top) the two
+                        curves are almost the same. As a decision (bottom), the error matters only where the signal is
+                        near T. Here <span id="fig-field-n">a few percent</span> of the pixels flip, all of them next to
+                        a crossing of T. Move the crossings and the same error flips more pixels or none.</figcaption>
+                </figure>
+
+                <h3>The question</h3>
+
+                <p>The course project was called <em>Does PSNR Lie?</em> The first idea was that PSNR puts
+                    designs in the wrong <em>order</em> for decision-valued operators. The finding that survived every
+                    check is about the <em>threshold</em> instead: no single PSNR value tells you that a design is good
+                    enough. The value you need depends on the task, on how the circuit is used, and on the images.
+                    Chapter 8 tells how the question changed.</p>
+
+                <div class="box ex">
+                    <span class="tag">The answer in four sentences</span>
+                    <ol class="four">
+                        <li>For each task, the project measured the <strong>safe PSNR</strong>: the PSNR above which
+                            every design was safe for the task.</li>
+                        <li>It ranges from <strong>29.0 dB</strong> (Sobel edges) to <strong>66.3 dB</strong>
+                            (segmentation), so one fixed threshold cannot fit all tasks.</li>
+                        <li>A 30 dB rule accepts designs that are clearly worse at the task in <strong>4 of 5
+                                tasks</strong>, even in the two field-valued control tasks.</li>
+                        <li>For a field-valued task (denoising) the safe PSNR can be <strong>predicted</strong> by a
+                            formula. For decision-valued tasks it cannot, because it depends on the use of the circuit
+                            and on the image.</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch2">
+                <div class="ch-num">Chapter 2</div>
+                <h2>PSNR, SSIM and the peak</h2>
+
+                <div class="box def">
+                    <span class="tag">Definition</span>
+                    <p>For an approximate output \(\hat{y}\) and the exact output \(y\) over \(N\) pixels,</p>
+                    \[
+                    \mathrm{MSE} = \frac{1}{N}\sum_{i}\big(\hat{y}_i - y_i\big)^2, \qquad
+                    \mathrm{PSNR} = 10\log_{10}\frac{\text{peak}^2}{\mathrm{MSE}}\ \text{dB}.
+                    \]
+                    <p>Higher is better. Identical outputs give infinite PSNR.</p>
+                </div>
+
+                <ul>
+                    <li>Every 10 dB means the MSE is 10 times smaller.</li>
+                    <li>Every 6 dB means the typical error is half as big, because \(20\log_{10}2 \approx 6.02\).</li>
+                    <li>In this project PSNR is always measured against the <strong>exact design's output on the same
+                            input</strong>, not against a clean image.</li>
+                </ul>
+
+                <h3>The peak matters</h3>
+
+                <p>The peak should be the full range the signal can take. For an 8-bit image that is 255. The Sobel
+                    magnitude \(M\) goes from 0 to 1530 (Chapter 4), so its peak is 1530. Using 255 for Sobel makes
+                    every Sobel PSNR too low by</p>
+                \[
+                20\log_{10}\frac{1530}{255} = 20\log_{10}6 = 15.56\ \text{dB}.
+                \]
+
+                <p>This mistake was in the project's own early results. Correcting it moved every Sobel point by the
+                    same 15.56 dB, as Figure 2.1 shows.</p>
+
+                <figure>
+                    <div class="fig" id="fig-peak"></div>
+                    <div class="legend"><span><span class="mk ok"></span>safe for the task</span><span><span
+                                class="mk bad"></span>not safe</span><span><i class="lc"
+                                style="background:var(--fig-axis)"></i>30 dB rule (dashed)</span></div>
+                    <figcaption><b>Figure 2.1</b> <em>(data)</em>. The 100 Sobel designs at the two peaks. Every point
+                        moves right by the same amount, so the order of the designs does not change. The 30 dB line
+                        does not move, so which designs it accepts changes a lot.</figcaption>
+                </figure>
+
+                <div class="box note">
+                    <span class="tag">Note</span>
+                    <p>This is a finding in its own right. A change of peak shifts every PSNR equally, so rankings and
+                        Kendall τ stay the same. Any comparison with a fixed number such as 30 dB changes. Papers that
+                        quote "30 dB" without saying which peak they used cannot be compared.</p>
+                </div>
+
+                <h3>SSIM</h3>
+
+                <p>SSIM (structural similarity) compares local means, contrasts and structure, and is 1 for identical
+                    images. The project checked whether SSIM does better than PSNR. It does not. Its Kendall τ with
+                    the task change is 0.21 for Sobel and 0.76 for denoising, against 0.25 and 0.80 for PSNR.</p>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch3">
+                <div class="ch-num">Chapter 3</div>
+                <h2>How a design is made cheaper</h2>
+
+                <p>Each design changes <strong>one</strong> arithmetic choice in an exact integer datapath. There are
+                    four kinds of change.</p>
+
+                <div class="tbl">
+                    <table>
+                        <tr>
+                            <th>Axis</th>
+                            <th>What it does</th>
+                            <th>Error it gives</th>
+                        </tr>
+                        <tr>
+                            <td>Truncation of \(k\) bits</td>
+                            <td>Drops the \(k\) lowest bits and puts zeros back: <code>(x &gt;&gt; k) &lt;&lt; k</code></td>
+                            <td>Always rounds down: a negative bias of about \(-(2^k-1)/2\)</td>
+                        </tr>
+                        <tr>
+                            <td>Rounding of \(k\) bits</td>
+                            <td>Adds half before dropping: <code>((x + 2<sup>k−1</sup>) &gt;&gt; k) &lt;&lt; k</code></td>
+                            <td>A bias of about \(+\tfrac12\), the same spread as truncation</td>
+                        </tr>
+                        <tr>
+                            <td>CSD to \(N\) digits</td>
+                            <td>Rounds each filter coefficient to a number with at most \(N\) nonzero signed digits</td>
+                            <td>A fixed change of the filter itself</td>
+                        </tr>
+                        <tr>
+                            <td>Library circuit in a slot</td>
+                            <td>Replaces every adder or multiplier in one slot with an approximate EvoApproxLib circuit</td>
+                            <td>Depends on the data; sometimes large, often biased</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>Truncation against rounding</h3>
+
+                <p>Both have the same variance, \((4^k-1)/12\) in units of the input's last bit. They differ only in
+                    the mean. That makes them a clean experiment on bias alone.</p>
+
+                <h3>CSD</h3>
+
+                <div class="box def">
+                    <span class="tag">Definition</span>
+                    <p><strong>Canonical signed digit</strong> (CSD) writes a number with digits −1, 0 and +1, with
+                        no two nonzero digits next to each other. Example: \(7 = 8 - 1\) has 2 nonzero digits, where
+                        plain binary 111 has 3. Each nonzero digit costs one adder or subtractor in a constant
+                        multiplier, so fewer digits means cheaper hardware.</p>
+                </div>
+
+                <p>CSD does nothing to Sobel, because its taps 1 and 2 already have one digit each. So the CSD axis is
+                    used on the Gaussian, with taps (14, 62, 104, 62, 14), and on the DCT.</p>
+
+                <h3>EvoApproxLib</h3>
+
+                <p>EvoApproxLib is a library of approximate adders and multipliers made by evolutionary design
+                    (Mrázek et al., DATE 2017). Each circuit comes as a C model and as Verilog. The library reports
+                    error metrics (MAE, worst-case error, error probability) measured on <strong>uniform random
+                        inputs</strong>, and it does not report the signed bias. On real image operands these numbers
+                    can be very different.</p>
+
+                <div class="box ex">
+                    <span class="tag">Example</span>
+                    <p><code>add12u_054</code> has a mean absolute error of 520.3 on uniform inputs, but 15.9 on the
+                        operands that Sobel actually sees. Its bias goes from −6.5 to +15.4. Library numbers do not
+                        transfer to images.</p>
+                </div>
+
+                <div class="box def">
+                    <span class="tag">Definition</span>
+                    <p>A <strong>slot</strong> is a group of adders in the datapath that all get the same circuit. In
+                        Sobel: <code>u8</code> (the four first pixel-pair sums), <code>u12</code> (the "+2·p" sums and
+                        the magnitude sum) and <code>s12</code> (the two signed differences). Harris adds
+                        <code>m11</code>, its 11×11-bit multipliers.</p>
+                </div>
+
+                <h3>Two exact facts about Sobel</h3>
+
+                <p><strong>M is always even.</strong> \(G_x + G_y = 2(p_6+p_8+p_9-p_1-p_2-p_4)\) is even, and
+                    \(|a|+|b|\) has the same parity as \(a+b\). So the lowest bit of \(M\) carries no information, and
+                    truncating \(M\) by one bit changes nothing.</p>
+
+                <p><strong>Truncating M is exactly a threshold shift.</strong></p>
+
+                <div class="box der">
+                    <span class="tag">Derivation</span>
+                    <p>Let \(\mathrm{trn}_k(M) = 2^k\lfloor M/2^k \rfloor\). This is a multiple of \(2^k\), so it is at
+                        least \(T\) exactly when it is at least the smallest multiple of \(2^k\) that is \(\ge T\):</p>
+                    \[
+                    \mathrm{trn}_k(M) \ge T \iff 2^k\lfloor M/2^k\rfloor \ge \lceil T/2^k\rceil 2^k
+                    \iff M \ge \lceil T/2^k\rceil\, 2^k .
+                    \]
+                    <p>So a truncated design with threshold \(T\) gives exactly the same edge map as the exact design
+                        with threshold \(\lceil T/2^k\rceil 2^k\). If \(2^k\) divides \(T\), nothing changes at
+                        all.</p>
+                </div>
+
+                <figure>
+                    <div class="fig" id="fig-trunc"></div>
+                    <figcaption><b>Figure 3.1.</b> Truncating 3 bits turns \(M\) into a staircase (orange dots). With
+                        \(T = 20\), the truncated design marks an edge from \(M = 24\) on, which is exactly the exact
+                        design with \(T = 24\). If the threshold can be re-tuned, truncating \(M\) costs no edge quality.
+                        PSNR still punishes it: the design <code>M-trn-3</code> has PSNR 36.7 dB at peak 255 and
+                        FOM 1.0 at \(T = 200\) and \(T = 400\).</figcaption>
+                </figure>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch4">
+                <div class="ch-num">Chapter 4</div>
+                <h2>Operators and task metrics</h2>
+
+                <h3>The six operators</h3>
+
+                <div class="tbl">
+                    <table>
+                        <tr>
+                            <th>Operator</th>
+                            <th>What it computes</th>
+                            <th>Output</th>
+                            <th>Task</th>
+                        </tr>
+                        <tr>
+                            <td>Sobel + threshold</td>
+                            <td>\(G_x, G_y\) from a 3×3 window, \(M=|G_x|+|G_y|\), edge if \(M\ge T\)</td>
+                            <td>Decision</td>
+                            <td>Edge detection on BSDS500</td>
+                        </tr>
+                        <tr>
+                            <td>Harris</td>
+                            <td>Gradients, products \(I_x^2, I_y^2, I_xI_y\), smoothed; \(R=\det-k\,\mathrm{tr}^2\); local
+                                maxima</td>
+                            <td>Decision</td>
+                            <td>Corner repeatability on the Oxford set</td>
+                        </tr>
+                        <tr>
+                            <td>Gaussian smoothing</td>
+                            <td>5-tap filter (14, 62, 104, 62, 14)/256 in both directions</td>
+                            <td>Field</td>
+                            <td>Denoising (control)</td>
+                        </tr>
+                        <tr>
+                            <td>8×8 DCT</td>
+                            <td>JPEG-style transform with an 8-bit fixed-point matrix</td>
+                            <td>Field</td>
+                            <td>Compression (control)</td>
+                        </tr>
+                        <tr>
+                            <td>Otsu threshold</td>
+                            <td>The threshold that best splits the histogram into two classes</td>
+                            <td>Decision</td>
+                            <td>Part of segmentation</td>
+                        </tr>
+                        <tr>
+                            <td>3×3 opening</td>
+                            <td>Erosion, then dilation, of a binary map</td>
+                            <td>Decision</td>
+                            <td>Part of segmentation</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <p>The <strong>segmentation pipeline</strong> is Gaussian → Otsu → opening. It tests the same
+                    Gaussian circuits in a second use, this time decision-valued. The Gaussian and the DCT are the
+                    <strong>controls</strong>: field-valued operators where PSNR is expected to work.</p>
+
+                <h3>The Sobel datapath</h3>
+
+                <p>With the 3×3 window \(p_1 \dots p_9\) in row order:</p>
+                \[
+                \begin{aligned}
+                G_x &= (p_3 + 2p_6 + p_9) - (p_1 + 2p_4 + p_7)\\
+                G_y &= (p_7 + 2p_8 + p_9) - (p_1 + 2p_2 + p_3)\\
+                M &= |G_x| + |G_y|, \qquad E = (M \ge T).
+                \end{aligned}
+                \]
+                <p>\(G_x\) and \(G_y\) each lie in [−1020, 1020], but \(M\) reaches only 1530, not 2040. Both
+                    gradients cannot be 1020 at once, because that needs \(p_3\) to be 255 and 0 at the same
+                    time.</p>
+
+                <h3>The task metrics</h3>
+
+                <div class="tbl">
+                    <table>
+                        <tr>
+                            <th>Task</th>
+                            <th>Metric</th>
+                            <th>Compared with</th>
+                            <th>In simple words</th>
+                        </tr>
+                        <tr>
+                            <td>Sobel</td>
+                            <td>BSDS boundary F at ODS</td>
+                            <td>Human-drawn boundaries</td>
+                            <td>How well the edges match what people drew, within a small distance</td>
+                        </tr>
+                        <tr>
+                            <td>Sobel (second)</td>
+                            <td>Pratt's FOM</td>
+                            <td>The exact design's edge map</td>
+                            <td>How close the edge pixels are to the exact design's edges</td>
+                        </tr>
+                        <tr>
+                            <td>Harris</td>
+                            <td>Repeatability within 1.5 px</td>
+                            <td>Known homography between two images</td>
+                            <td>The share of corners found again in the transformed image</td>
+                        </tr>
+                        <tr>
+                            <td>Denoising</td>
+                            <td>PSNR against the clean image</td>
+                            <td>Clean image (noise σ = 10 added)</td>
+                            <td>How well the filter removes noise</td>
+                        </tr>
+                        <tr>
+                            <td>Compression</td>
+                            <td>BD-rate</td>
+                            <td>The original image</td>
+                            <td>Extra bits needed for the same quality, in %</td>
+                        </tr>
+                        <tr>
+                            <td>Segmentation</td>
+                            <td>Relative component-count error</td>
+                            <td>The exact pipeline</td>
+                            <td>Did the number of regions change?</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="box def">
+                    <span class="tag">Definition</span>
+                    <p><strong>Precision</strong> is the share of detected edge pixels that match a human edge.
+                        <strong>Recall</strong> is the share of human edge pixels that were detected.
+                        \(F = 2PR/(P+R)\).</p>
+                    <p><strong>ODS</strong> (optimal dataset scale): one threshold for the whole dataset, chosen to
+                        maximise F. <strong>OIS</strong>: the best threshold for each image separately. The project
+                        uses ODS.</p>
+                </div>
+
+                <ul>
+                    <li><strong>Re-tuned or fixed threshold.</strong> Re-tuned means each design gets its own best
+                        threshold. Fixed means every design uses the exact design's best threshold. A design that
+                        shifts \(M\) up or down acts like a different threshold, and re-tuning absorbs that. Both are
+                        reported.</li>
+                    <li><strong>BD-rate</strong> (Bjøntegaard delta rate): run the coder at several quality settings,
+                        plot bits against PSNR, fit a curve to each design, and measure the average horizontal gap
+                        between the curves. +1% means 1% more bits for the same quality. With 10 quality points the
+                        project fits a least-squares cubic.</li>
+                    <li><strong>Topology changed</strong>: the component count or the Euler number (components minus
+                        holes) differs from the exact pipeline.</li>
+                </ul>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch5">
+                <div class="ch-num">Chapter 5</div>
+                <h2>Deciding that a design is safe</h2>
+
+                <h3>The bootstrap</h3>
+
+                <div class="box def">
+                    <span class="tag">Definition</span>
+                    <p>A <strong>paired bootstrap</strong> confidence interval: take the 50 images, draw 50 of them
+                        with replacement, and compute the task change of the design against the exact design on that
+                        draw. Repeat 10,000 times. The middle 95% of the results is the 95% confidence interval. It is
+                        <em>paired</em> because both designs are scored on the same drawn images, so the
+                        image-to-image variation cancels.</p>
+                </div>
+
+                <h3>The margin and the three verdicts</h3>
+
+                <p>"Is the design exactly as good?" cannot be shown. The question is instead "is it worse by more than
+                    a margin δ?". The margins were <strong>fixed before any task result was computed</strong>:</p>
+
+                <div class="tbl">
+                    <table>
+                        <tr>
+                            <th>Task</th>
+                            <th>Margin δ</th>
+                        </tr>
+                        <tr>
+                            <td>Sobel</td>
+                            <td>0.005 in F</td>
+                        </tr>
+                        <tr>
+                            <td>Denoising</td>
+                            <td>0.1 dB of denoising PSNR</td>
+                        </tr>
+                        <tr>
+                            <td>Compression</td>
+                            <td>1% BD-rate</td>
+                        </tr>
+                        <tr>
+                            <td>Segmentation</td>
+                            <td>0.01 relative component-count error</td>
+                        </tr>
+                        <tr>
+                            <td>Harris</td>
+                            <td>0.005 in repeatability, chosen <strong>after</strong> seeing the data, so Harris is called
+                                exploratory</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <figure>
+                    <div class="fig" id="fig-verdict"></div>
+                    <figcaption><b>Figure 5.1.</b> The three verdicts. Each bar is a 95% interval for the design's
+                        task change. <b>Safe</b>: the whole interval is above −δ, so with 95% confidence it loses less
+                        than the margin. <b>Shown inferior</b>: the whole interval is below −δ. <b>Inconclusive</b>: the
+                        interval crosses −δ.</figcaption>
+                </figure>
+
+                <h3>Safe PSNR</h3>
+
+                <div class="box def">
+                    <span class="tag">Definition</span>
+                    <p>The <strong>safe PSNR</strong> of a task is the highest PSNR of any design that is
+                        <em>not</em> safe (shown inferior or inconclusive). Every design above it is safe. It answers
+                        the question: what PSNR threshold would have been needed to accept only safe designs?</p>
+                </div>
+
+                <div class="box note">
+                    <span class="tag">Note</span>
+                    <p>Counting inconclusive designs as not safe is conservative on purpose. The paper also reports the
+                        version that counts only shown-inferior designs, so the reader can see what this choice
+                        does.</p>
+                </div>
+
+                <h3>Rank agreement</h3>
+
+                <p><strong>Kendall τ</strong> measures how well two orderings agree, from −1 (reversed) to +1 (the
+                    same). τ<sub>b</sub> handles ties. <strong>Spearman ρ</strong> is the correlation of the ranks.
+                    A <strong>partial ρ</strong> is the correlation after removing the effect of a third variable.</p>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch6">
+                <div class="ch-num">Chapter 6</div>
+                <h2>The hardware</h2>
+
+                <h3>Two implementations of the same arithmetic</h3>
+
+                <figure>
+                    <div class="fig" id="fig-pipeline"></div>
+                    <figcaption><b>Figure 6.1.</b> The flow. Python is fast enough to run every design on many images
+                        and score the task. The HLS kernel is the real hardware and gives the cost. The Python outputs
+                        are saved as golden vectors and the hardware must reproduce them bit for bit in C simulation
+                        and in RTL co-simulation.</figcaption>
+                </figure>
+
+                <div class="box def">
+                    <span class="tag">Definition</span>
+                    <p><strong>Bit-exact</strong>: the HLS kernel and the Python reference give exactly the same
+                        output bits on the same input. This guarantees that the quality numbers belong to the hardware
+                        whose cost is reported. Both sides call the same EvoApproxLib C models.</p>
+                </div>
+
+                <h3>The numbers to remember</h3>
+
+                <div class="tbl">
+                    <table>
+                        <tr>
+                            <th>Item</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td>Designs</td>
+                            <td><strong>257</strong> = Sobel 105 + Harris 23 + Otsu 13 + opening 1 + Gaussian 85 + DCT 30</td>
+                        </tr>
+                        <tr>
+                            <td>Target</td>
+                            <td>Zynq-7020 FPGA (<code>xc7z020clg400-1</code>), 10 ns clock (100 MHz)</td>
+                        </tr>
+                        <tr>
+                            <td>Tools</td>
+                            <td>Vitis HLS 2025.1 and Vivado 2025.1</td>
+                        </tr>
+                        <tr>
+                            <td>Checks</td>
+                            <td>All 257 pass C simulation and co-simulation bit for bit, and all meet 10 ns after place
+                                and route</td>
+                        </tr>
+                        <tr>
+                            <td>Throughput</td>
+                            <td>One pixel per clock (II = 1). Sobel co-simulation on 512×512 takes 263,180 cycles =
+                                513² + 11</td>
+                        </tr>
+                        <tr>
+                            <td>Sobel exact</td>
+                            <td>224 LUT, 331 FF, 1 DSP, 2 BRAM after routing; 10.32 mW dynamic power</td>
+                        </tr>
+                        <tr>
+                            <td>Harris exact</td>
+                            <td>1480 LUT, 16 DSP, 22 BRAM; 93.5 mW dynamic power</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>How the kernels work</h3>
+
+                <p>All kernels are <strong>streaming</strong>: pixels arrive one per clock in raster order. A
+                    <strong>line buffer</strong> keeps the last two rows, so a full 3×3 window is available at every
+                    pixel without storing the whole image. The loop carries <code>#pragma HLS PIPELINE II=1</code>, so
+                    a new pixel enters every clock.</p>
+
+                <p>The approximate circuits are plugged in with <code>#ifdef</code>. A generated header may define
+                    <code>U8_FN</code>, <code>U12G_FN</code> and so on as an EvoApproxLib C model. If it does not, the
+                    code uses plain <code>a + b</code>. So one source file builds every design. The longest kernel is
+                    Harris at 181 lines; Sobel has 161 and the others 70 to 83.</p>
+
+                <h3>Hardware findings</h3>
+
+                <ol>
+                    <li><strong>HLS estimates are far off.</strong> C synthesis overestimates LUTs about 4× and FFs
+                        about 2× (Sobel exact: 884 → 224 LUT, 660 → 331 FF). Only post-route numbers are reported.</li>
+                    <li><strong>Most of a small kernel is not arithmetic.</strong> A control kernel with the same
+                        streaming and line buffers but no Sobel maths uses 156 LUT. So about 70% of the exact Sobel's
+                        224 LUT is infrastructure.</li>
+                    <li><strong>Approximate adders often cost more on an FPGA.</strong> 47 of 78 EvoApproxLib adder
+                        swaps cost more LUTs than exact <code>+</code> (Figure 6.2). An FPGA has dedicated carry chains
+                        (CARRY4) that make an exact adder cheap. The library circuits are gate-level netlists designed
+                        for ASICs, so they are mapped onto general LUTs. Even the library's own exact circuit
+                        <code>add12u_19A</code> costs 326 LUT against 224. Synthesising all 168 library circuits alone
+                        confirmed it: the library's exact circuits cost 13–88% more LUTs than the HDL operator.</li>
+                    <li><strong>The library's ASIC area still ranks circuits correctly.</strong> Spearman 0.73–0.91
+                        with FPGA LUTs. The ranking transfers; the saving against exact <code>+</code> does not.</li>
+                    <li><strong>Approximate multipliers lose to DSP blocks.</strong> In Harris, every approximate
+                        11×11 multiplier costs more LUTs (1602–2695) than the exact design (1480 LUT plus DSPs). Only the
+                        gradient shift saves area.</li>
+                    <li><strong>The post-route period at a loose clock is not Fmax.</strong> At a 10 ns target Vivado
+                        stops optimising once timing is met. The directive set alone moves Fmax by 4–12%. Only two
+                        designs (<code>G-trn-2</code>, <code>G-trn-3</code>) are established as slower than exact.</li>
+                    <li><strong>HLS can report II = 1 and still fail timing.</strong> The first Otsu kernel did, and
+                        missed 10 ns after routing (16.6–17.8 ns). Two histogram banks and an unpipelined scan fixed it.
+                        Lesson: treat HLS warnings 200-886/887 as errors.</li>
+                    <li><strong>Power from switching activity.</strong> Vectorless power estimates guess how often
+                        signals toggle. Instead the routed netlist was simulated on real images, its outputs were checked
+                        against RTL co-simulation byte for byte, and the switching activity (SAIF) was fed back to
+                        Vivado. Static power (about 103 mW) is the same for all designs, so dynamic power is
+                        compared.</li>
+                    <li><strong>Vivado is deterministic.</strong> Re-implementing the first 13 Sobel designs gave
+                        identical results.</li>
+                </ol>
+
+                <figure>
+                    <div class="fig" id="fig-lut"></div>
+                    <div class="legend"><span><span class="mk ok"></span>cheaper than exact</span><span><span
+                                class="mk bad"></span>costs more than exact</span><span><i class="ld"></i>exact +</span>
+                    </div>
+                    <figcaption><b>Figure 6.2</b> <em>(data)</em>. Every EvoApproxLib adder swapped into one Sobel slot,
+                        with the LUTs of the whole routed kernel. Every <code>s12</code> swap costs more. The carry chain
+                        makes exact addition hard to beat on an FPGA.</figcaption>
+                </figure>
+
+                <h3>Two cost views</h3>
+
+                <p>HLS decides by itself whether a multiplication uses a DSP block or LUTs. That makes LUT counts hard to
+                    compare: the exact DCT uses 62 DSPs and the 1-digit CSD DCT uses none. So for the Gaussian, the DCT
+                    and the opening there is also a <strong>fabric view</strong>, with every multiplier in LUTs. The
+                    paper's cost table uses that view for the Gaussian and the DCT. Otsu does not meet 10 ns in the
+                    fabric view, so it has only the default view.</p>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch7">
+                <div class="ch-num">Chapter 7</div>
+                <h2>How the experiments ran</h2>
+
+                <h3>Data</h3>
+                <ul>
+                    <li><strong>BSDS500</strong> (Berkeley segmentation dataset): natural photos with human-drawn
+                        boundaries. The project uses the 100 validation images. The <strong>first 50</strong> (sorted by
+                        id) are the main set; the <strong>other 50</strong> are the held-out set, added later.</li>
+                    <li><strong>Oxford affine set</strong> (Mikolajczyk et al.): 8 sequences of one scene under
+                        viewpoint, zoom, blur, light and JPEG changes, with known homographies. 40 image pairs, used for
+                        Harris.</li>
+                    <li><strong>A synthetic set</strong> of 96 images with controlled contrast and texture, for the
+                        image-dependence check.</li>
+                </ul>
+
+                <h3>The Sobel threshold problem</h3>
+
+                <p>The proposal said \(T = 60\). On this scale (\(M\) from 0 to 1530), \(T = 60\) marks about half of
+                    every image as edge: the median edge density is 49%. People draw boundaries on about 1.5% of pixels
+                    per annotator, 5.4% for the union. Densities near the human level need \(T \approx 300\)–500. So
+                    \(T = 60\) is meaningless here.</p>
+
+                <div class="box def">
+                    <span class="tag">Definition</span>
+                    <p><strong>Density-matched grid.</strong> Each design gets 19 thresholds that give the same edge
+                        densities as the exact design at \(T = 240, 250, \dots, 420\). A design that inflates \(M\) is
+                        then compared at the same edge density, not at the same number.</p>
+                    <p><strong>Grid-edge extension.</strong> If a design's best threshold is the first or the last of
+                        its 19, the true best may lie outside the grid. Then the next two thresholds that actually change
+                        the edge map are added.</p>
+                </div>
+
+                <h3>The official BSDS benchmark</h3>
+
+                <p>Matching edge pixels to human boundaries is done with the official BSDS MATLAB code, on a separate
+                    cluster that has MATLAB. Two compatibility fixes were needed (a compiler flag and one
+                    <code>load</code> call); neither changes the algorithm.</p>
+                <ul>
+                    <li>The project also wrote a Python port. It differs from the official code by about as much as the
+                        official code differs from itself, because the official matcher is randomised.</li>
+                    <li>The official matcher, matching a map against itself, scores 0.997, not 1. That is its noise
+                        floor.</li>
+                    <li>Matching is slow: about 165 s per image for 6 maps at \(T = 60\).</li>
+                </ul>
+
+                <h3>The other tasks</h3>
+                <ul>
+                    <li><strong>Denoising</strong>: add Gaussian noise with σ = 10, smooth with the design, compare with
+                        the clean image. The exact filter reaches 26.7 dB.</li>
+                    <li><strong>Compression</strong>: JPEG-style coding with the design's DCT at ten quality factors,
+                        BD-rate against the exact DCT. The "exact" DCT is itself 8-bit fixed point: it has a +1.1% DC gain
+                        error and caps reconstruction at 47.4 dB. A floating-point DCT is kept as a reference.</li>
+                    <li><strong>Segmentation</strong>: noise-free images through Gaussian → Otsu → opening; compare the
+                        component count and Euler number with the exact pipeline.</li>
+                    <li><strong>Harris</strong>: repeatability within 1.5 px on the 40 Oxford pairs.</li>
+                </ul>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch8">
+                <div class="ch-num">Chapter 8</div>
+                <h2>How the claim changed</h2>
+
+                <p>A viva often asks what you expected and what happened. This is the order in which it happened.</p>
+
+                <h3>1. Equal PSNR, different decisions</h3>
+
+                <p>Two artificial errors on \(M\), both with PSNR 42.11 dB at peak 255: <strong>A</strong> adds ±2 at
+                    random, <strong>B</strong> subtracts 2 everywhere. Against the <em>exact design's</em> edge map,
+                    FOM and recall preferred A on 50 of 50 images at every \(T \le 300\). Against <em>human labels</em>
+                    the difference was tiny (F differs by at most 0.004) and its sign depended on \(T\), because B is
+                    exactly a threshold shift by 2.</p>
+                <p><strong>Lesson:</strong> always say which reference a metric uses, the exact output or human
+                    labels.</p>
+
+                <h3>2. The Sobel sweep: "PSNR rejects good designs"</h3>
+
+                <p>105 designs on 50 images, scored by ODS F against human labels, with PSNR at peak 255. The 30 dB rule
+                    accepted 44 designs and the task rule 88. Every PSNR-accepted design was fine, so PSNR looked too
+                    <em>strict</em>. τ(PSNR, ODS F) was only +0.25, while τ(PSNR, FOM against exact) was +0.82.</p>
+
+                <h3>3. Harris: "PSNR accepts bad designs"</h3>
+
+                <p>For Harris, the 30 dB rule accepted all 23 designs, including <code>shift6</code>, which loses 0.027
+                    repeatability. So PSNR looked too <em>lax</em>. Together: "PSNR fails in both directions on
+                    decision-valued operators".</p>
+
+                <h3>4. The controls broke the story</h3>
+
+                <p>The field-valued controls were added to show that PSNR works where it should. But the 30 dB rule
+                    also accepted task-inferior designs there. So false accepts are not special to decision-valued
+                    operators. The real problem is that <strong>30 dB is not calibrated for any task</strong>. The claim
+                    changed from "PSNR ranks badly" to "a fixed PSNR threshold cannot decide acceptance". Rankings by
+                    PSNR are in fact reasonable in most tasks (τ 0.76–0.94).</p>
+
+                <h3>5. The peak mistake</h3>
+
+                <p>An audit of the paper draft found that Sobel PSNR used peak 255 although \(M\) goes to 1530
+                    (Chapter 2). With the full-scale peak every Sobel PSNR rises by 15.56 dB:</p>
+                <ul>
+                    <li>the Sobel safe PSNR moves from 13.4 to <strong>29.0 dB</strong>;</li>
+                    <li>the 30 dB rule's false rejects for Sobel drop from 44 to <strong>6</strong>.</li>
+                </ul>
+                <p>So "30 dB rejects 44 good Sobel designs" was an artefact of the convention. At full scale the 30 dB
+                    rule is roughly right for Sobel. What survived: the rule accepts shown-inferior designs in 4 of 5
+                    tasks, never in Sobel.</p>
+
+                <h3>6. Held-out images and the grid edge</h3>
+
+                <p>Everything except Harris was rerun on the 50 held-out images. Sobel first gave 38.6 dB. The cause was
+                    <code>M-rnd-6</code> (rounding 6 bits, so \(M\) is a multiple of 64): its best threshold was the
+                    lowest of its grid, so its F was underestimated. The grid-edge extension (Chapter 7) was applied to
+                    both image sets. The held-out Sobel value became 28.9 dB, and the first-set results did not change.
+                    The paper says that this rule was added after the held-out run.</p>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch9">
+                <div class="ch-num">Chapter 9</div>
+                <h2>The results</h2>
+
+                <p>This chapter follows the order of the paper's results section.</p>
+
+                <h3>An example to start with</h3>
+
+                <p>The paper opens with one image. Truncating 4 bits in the Gaussian gives 63.9 dB on average (64.8 dB
+                    on the image shown). On that image only 42 of 151,209 pixels differ and the Otsu threshold stays the
+                    same, yet the number of components drops from 17 to 14. Over the 50 images this design changes the
+                    segmentation topology of 44% of them. (151,209 = (481 − 4) × (321 − 4), the valid pixels after the
+                    borders.)</p>
+
+                <h3>Safe PSNR per task</h3>
+
+                <figure>
+                    <div class="fig panels" id="fig-ranking"></div>
+                    <div class="legend"><span><span class="mk ok"></span>safe</span><span><span
+                                class="mk bad"></span>not safe</span><span><i class="lb"></i>safe PSNR</span><span><i
+                                style="background:var(--fig-axis)"></i>30 dB (dashed)</span></div>
+                    <figcaption><b>Figure 9.1</b> <em>(data)</em>. PSNR against the task change for every design, first
+                        50 images. Everything to the right of the orange line is safe. A point to the right of the
+                        dashed line but marked "not safe" is a false accept of the 30 dB rule. Arrows at the edge are
+                        points off the chart.</figcaption>
+                </figure>
+
+                <div class="tbl">
+                    <table>
+                        <tr>
+                            <th>Task</th>
+                            <th>n</th>
+                            <th>Safe PSNR</th>
+                            <th>Inferior only</th>
+                            <th>Held-out</th>
+                            <th>30 dB: false accepts (inferior) / false rejects</th>
+                        </tr>
+                        <tr>
+                            <td>Sobel, re-tuned T</td>
+                            <td>100</td>
+                            <td>29.0</td>
+                            <td>27.5</td>
+                            <td>28.9</td>
+                            <td>0 (0) / 6</td>
+                        </tr>
+                        <tr>
+                            <td>Sobel, fixed T</td>
+                            <td>100</td>
+                            <td>39.4</td>
+                            <td>29.0</td>
+                            <td>39.3</td>
+                            <td>2 (0) / 2</td>
+                        </tr>
+                        <tr>
+                            <td>Harris</td>
+                            <td>22</td>
+                            <td>67.9</td>
+                            <td>52.0</td>
+                            <td>–</td>
+                            <td>17 (7) / 0</td>
+                        </tr>
+                        <tr>
+                            <td>Denoising</td>
+                            <td>78</td>
+                            <td>44.9</td>
+                            <td>44.1</td>
+                            <td>45.0</td>
+                            <td>13 (12) / 0</td>
+                        </tr>
+                        <tr>
+                            <td>Compression</td>
+                            <td>28</td>
+                            <td>48.7</td>
+                            <td>45.9</td>
+                            <td>49.1</td>
+                            <td>14 (12) / 0</td>
+                        </tr>
+                        <tr>
+                            <td>Segmentation</td>
+                            <td>78</td>
+                            <td>66.3</td>
+                            <td>60.0</td>
+                            <td>63.9</td>
+                            <td>45 (30) / 0</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <ul>
+                    <li><strong>n</strong> counts designs with a finite PSNR. Designs identical to exact have infinite
+                        PSNR and are left out.</li>
+                    <li><strong>Inferior only</strong> is the same as the safe PSNR but counts only shown-inferior
+                        designs.</li>
+                    <li><strong>False accept</strong>: accepted by 30 dB but not safe; in brackets, those shown inferior.
+                        <strong>False reject</strong>: rejected by 30 dB but safe.</li>
+                    <li>Sobel reads as: 30 dB is close to right. Every other task: 30 dB is much too low, and
+                        segmentation needs about 66 dB.</li>
+                </ul>
+
+                <figure>
+                    <div class="fig" id="fig-safe"></div>
+                    <div class="legend"><span><span class="mk badfill"></span>safe PSNR</span><span><span
+                                class="mk hollow"></span>shown inferior only</span><span><span
+                                class="mk held"></span>held-out images</span></div>
+                    <figcaption><b>Figure 9.2.</b> The table above at a glance. The held-out value sits just under each row. The needed threshold runs from about 29 to 66 dB.
+                        No single dashed line can sit to the right of every task.</figcaption>
+                </figure>
+
+                <h4>How robust is it?</h4>
+                <ul>
+                    <li>Counting only shown-inferior designs: 27.5 to 60.0 dB.</li>
+                    <li>Doubling every margin lowers the safe PSNR by 3.3 to 8.4 dB; Sobel stays at 29.0.</li>
+                    <li>With a fixed Sobel threshold: 39.4 dB, because the threshold can no longer absorb shifts of
+                        \(M\).</li>
+                    <li>SSIM is no better than PSNR.</li>
+                    <li>τ is 0.76–0.94 for Harris, denoising, compression and topology. Sobel against human labels is the
+                        exception (0.25), because 74 of 100 designs change F by less than 0.001, and their order is
+                        noise.</li>
+                </ul>
+
+                <h3>Predicting the safe PSNR of a field-valued task</h3>
+
+                <div class="box der">
+                    <span class="tag">Derivation: Eq. 1</span>
+                    <ol>
+                        <li>The exact denoiser already makes an error against the clean image, with mean square
+                            \(\mathrm{MSE}_{dn}\).</li>
+                        <li>The approximation adds its own error against the exact output, \(\mathrm{MSE}_{e}\).</li>
+                        <li>If the two errors are unrelated, their mean squares add:
+                            \(\mathrm{MSE}_{total} = \mathrm{MSE}_{dn} + \mathrm{MSE}_{e}\).</li>
+                        <li>So the denoising PSNR drops by
+                            \[ \Delta = 10\log_{10}\!\Big(1 + \frac{\mathrm{MSE}_e}{\mathrm{MSE}_{dn}}\Big)
+                            = 10\log_{10}\!\big(1 + 10^{(\mathrm{PSNR}_{dn} - \mathrm{PSNR}_e)/10}\big). \]
+                            (Both PSNRs use peak 255, so the ratio of MSEs is \(10^{(\mathrm{PSNR}_{dn} -
+                            \mathrm{PSNR}_e)/10}\).)</li>
+                        <li>Set \(\Delta = \delta\) and solve for \(\mathrm{PSNR}_e\):
+                            \[ \mathrm{PSNR}_{safe} = \mathrm{PSNR}_{dn} - 10\log_{10}\big(10^{\delta/10} - 1\big).
+                            \]</li>
+                    </ol>
+                </div>
+
+                <div class="box ex">
+                    <span class="tag">Example: do this on the board</span>
+                    <p>\(\mathrm{PSNR}_{dn} = 26.7\) dB and \(\delta = 0.1\) dB.</p>
+                    \[
+                    10^{0.1/10} = 1.0233,\quad 1.0233 - 1 = 0.0233,\quad 10\log_{10}0.0233 = -16.3,
+                    \]
+                    \[
+                    \mathrm{PSNR}_{safe} = 26.7 + 16.3 = 43.0\ \text{dB}\quad(\text{measured: } 44.9\ \text{dB}).
+                    \]
+                </div>
+
+                <figure>
+                    <div class="fig" id="fig-eq1"></div>
+                    <div class="legend"><span><i class="la"></i>Eq. 1</span><span><span class="mk ok"></span>safe
+                            design</span><span><span class="mk bad"></span>not safe</span><span><i
+                                class="ld"></i>margin δ = 0.1 dB</span></div>
+                    <figcaption><b>Figure 9.3</b> <em>(data)</em>. The curve is Eq. 1 with no fitting. The points are the
+                        78 Gaussian designs, measured. They sit on the curve: the median error over the 78 designs is
+                        0.006 dB. The loss axis is logarithmic, so small and large losses both fit. <span
+                            id="fig-eq1-n">A few</span> designs lose less than 0.001 dB (or gain a little) and are drawn as
+                        arrows at the bottom.
+                    </figcaption>
+                </figure>
+
+                <div class="box note">
+                    <span class="tag">Why 44.9 and not 43.0?</span>
+                    <p>The measured value is set by one design, <code>u16=add16u_1US</code>. It loses 0.106 dB of
+                        denoising PSNR on average (interval −0.130 to −0.085 dB), so it is inconclusive at δ = 0.1. At
+                        its PSNR, Eq. 1 predicts a loss of about 0.065 dB. Near the margin the loss changes slowly with
+                        PSNR, so this 0.04 dB gap moves the safe PSNR by about 2 dB. Why this one design loses more than
+                        predicted was not investigated.</p>
+                </div>
+
+                <p>For decision-valued tasks no such formula exists. Their loss depends on where the errors fall
+                    relative to the threshold, not on their total energy.</p>
+
+                <h3>Held-out images</h3>
+                <ul>
+                    <li>Same designs and margins on the other 50 images: 28.9, 45.0, 49.1 and 63.9 dB (against 29.0,
+                        44.9, 48.7 and 66.3). Eq. 1 gives 42.9 dB.</li>
+                    <li>30 dB again accepts shown-inferior designs: 10 for denoising, 11 for compression, 30 for
+                        segmentation, none for Sobel.</li>
+                    <li><strong>Transfer across images</strong>: use the safe PSNR from the first 50 images as the
+                        threshold on the other 50. It accepts at most 2 not-safe designs per task, none shown inferior.
+                        The 30 dB rule accepts 13 to 39. The calibrated threshold is conservative for Sobel and
+                        segmentation: it rejects 4 and 10 safe designs.</li>
+                    <li><strong>Transfer across design families</strong> is worse. The 16 quantised Gaussian designs give
+                        30.6 dB, because no quantised design lies between 30.6 and 51.2 dB. That threshold accepts 12
+                        library circuits that are not safe. A threshold calibrated on one kind of approximation does not
+                        carry over to another.</li>
+                </ul>
+
+                <h3>The same circuit in two uses</h3>
+
+                <p>52 Gaussian circuits are safe for denoising. <strong>32</strong> of them are not safe as the front
+                    end of segmentation, at PSNRs of 46.2–66.3 dB. The reverse never happens. On the held-out images it is
+                    26 of 52.</p>
+
+                <figure>
+                    <div class="fig" id="fig-twouses"></div>
+                    <div class="legend"><span><span class="mk ok"></span>safe in both uses</span><span><span
+                                class="mk bad"></span>safe as a smoother only</span><span><span class="mk x">×</span>not
+                            safe as a smoother</span></div>
+                    <figcaption><b>Figure 9.4</b> <em>(data)</em>. Each point is one Gaussian circuit. The orange squares
+                        pass the denoising check but break the segmentation of some images, even above 60 dB.
+                    </figcaption>
+                </figure>
+
+                <p>Why: in denoising the error is spread over all pixels and costs PSNR in proportion. In segmentation,
+                    only errors that push a pixel across the Otsu threshold matter, and one gray level can split or merge
+                    regions. A PSNR check on the front end also cannot see approximations in later stages: an Otsu design
+                    with a 16-bit shorter comparison word has a mean relative component-count error of 4.6, while the
+                    front-end PSNR is unaffected.</p>
+
+                <h3>Which images are fragile</h3>
+
+                <div class="box def">
+                    <span class="tag">Definition</span>
+                    <p>The <strong>fragility</strong> of an image is the share of Gaussian front ends above 50 dB that
+                        change its topology.</p>
+                </div>
+
+                <figure>
+                    <div class="fig" id="fig-images"></div>
+                    <figcaption><b>Figure 9.5</b> <em>(data)</em>. Images with more pixels within one gray level of the
+                        Otsu threshold are more fragile. A one-level error can only flip pixels that close to the
+                        threshold.</figcaption>
+                </figure>
+
+                <ul>
+                    <li>Spearman ρ = 0.60 (p = 4×10⁻⁶); partial ρ = 0.45 after removing the component count.
+                        Held-out: 0.78, partial 0.67. Synthetic set: 0.78, partial 0.68.</li>
+                    <li>Contrast alone predicts fragility only weakly (−0.29).</li>
+                    <li>The 63.9 dB design changes 44% of images, so a check on one random image passes it with
+                        probability 0.56. Validating on one image is a coin toss.</li>
+                </ul>
+
+                <h3>Choosing a design by cost</h3>
+                <ul>
+                    <li>Cost is post-route LUTs. For each rule, take the cheapest design it accepts.</li>
+                    <li>For Harris, the Gaussian (both uses) and the DCT, the cheapest design above 30 dB is
+                        task-inferior: −0.027 repeatability, −1.44 dB denoising, 9.5% component-count error and −4.7 dB
+                        BD-PSNR.</li>
+                    <li>The task rule saves less area and loses nothing beyond its margin.</li>
+                    <li>For Sobel the two picks differ by one LUT (209 for <code>add8u_8LL</code>, 208 for
+                        <code>add8u_8AS</code>).</li>
+                    <li>The largest saving found is 57% of the LUTs, from 1-digit CSD in the DCT, but it fails both
+                        rules.</li>
+                </ul>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch10">
+                <div class="ch-num">Chapter 10</div>
+                <h2>Objectives and recommendations</h2>
+
+                <h3>The five course objectives</h3>
+
+                <div class="grid2">
+                    <div class="cell">
+                        <h5>1. Same ranking?</h5>
+                        <p>Mostly yes against the exact output: τ 0.76–0.94, and 0.82 for Sobel FOM. Against human labels
+                            Sobel's τ is 0.25, because most designs barely change F. The problem is the threshold, not the
+                            ranking.</p>
+                    </div>
+                    <div class="cell">
+                        <h5>2. Is the PSNR pick on the front?</h5>
+                        <p>For Harris, the Gaussian and the DCT, the cheapest design passing 30 dB is task-inferior. For
+                            Sobel at full-scale peak the two picks differ by one LUT.</p>
+                    </div>
+                    <div class="cell">
+                        <h5>3. Which mechanism?</h5>
+                        <p>Library adders in the wide <code>u12</code> slot: large, data-dependent, heavy-tailed, biased
+                            errors (bias −97 to +528, 99th-percentile error up to 1,619). Truncation and rounding give
+                            small, regular errors that PSNR orders well.</p>
+                    </div>
+                    <div class="cell">
+                        <h5>4. Image statistics?</h5>
+                        <p>Yes. The share of pixels within one gray level of the threshold predicts fragility (ρ 0.60,
+                            held-out 0.78, synthetic 0.78).</p>
+                    </div>
+                </div>
+
+                <p><strong>Objective 5</strong> asked for a protocol. It is the three recommendations below.</p>
+
+                <h3>Three recommendations</h3>
+                <ol>
+                    <li><strong>Accept on the task metric of the actual use</strong>, with a margin fixed in advance and
+                        a paired bootstrap over tens of images. If a PSNR threshold is needed, compute it with Eq. 1 for
+                        field tasks, and calibrate it per operator, use and design family for decision tasks.</li>
+                    <li><strong>State the PSNR convention</strong> (the peak) and the reference of every metric.</li>
+                    <li><strong>Describe test images by their near-threshold pixel share</strong>, and never validate on
+                        one image.</li>
+                </ol>
+
+                <h3>Deliverables</h3>
+                <p>A Python harness with a bit-accurate approximation layer, a results database and figures, a survey of
+                    25 papers, and HLS sources with Vivado reports for 257 designs. The plan asked for 8 to 12.</p>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch11">
+                <div class="ch-num">Chapter 11</div>
+                <h2>Weak spots</h2>
+
+                <p>Know these before the examiner does.</p>
+
+                <div class="tbl">
+                    <table>
+                        <tr>
+                            <th>Weak spot</th>
+                            <th>What to say</th>
+                        </tr>
+                        <tr>
+                            <td>The safe PSNR is a maximum, so one design can move it</td>
+                            <td>The shown-inferior, doubled-margin and held-out versions are also reported. They move it
+                                by a few dB, not the conclusion.</td>
+                        </tr>
+                        <tr>
+                            <td>Inconclusive designs count as not safe</td>
+                            <td>Conservative on purpose. The "inferior only" column shows the result without that
+                                choice.</td>
+                        </tr>
+                        <tr>
+                            <td>The held-out images come from the same dataset</td>
+                            <td>True. Transfer to other image sources is not tested.</td>
+                        </tr>
+                        <tr>
+                            <td>Harris: margin chosen after the data, only 8 sequences, no held-out set</td>
+                            <td>That is why Harris is labelled exploratory and kept out of the headline range.</td>
+                        </tr>
+                        <tr>
+                            <td>The grid-edge extension came after the held-out result</td>
+                            <td>It is applied to both sets in the same way, changes nothing on the first set, and is
+                                disclosed.</td>
+                        </tr>
+                        <tr>
+                            <td>Sobel results assume a re-tuned threshold</td>
+                            <td>The fixed-threshold row is in the table too (39.4 dB).</td>
+                        </tr>
+                        <tr>
+                            <td>The datapaths and slot choices are the project's own</td>
+                            <td>True. Other datapaths could give other numbers.</td>
+                        </tr>
+                        <tr>
+                            <td>One FPGA, one clock</td>
+                            <td>True. Cost numbers are for the Zynq-7020 at 100 MHz.</td>
+                        </tr>
+                        <tr>
+                            <td>The "exact" DCT is fixed point</td>
+                            <td>Stated. It caps reconstruction at 47.4 dB, and a floating-point DCT is the reference.</td>
+                        </tr>
+                        <tr>
+                            <td>The BSDS matcher is randomised</td>
+                            <td>Its self-variation is about the size of the Python port's deviation. A self-match scores
+                                0.997.</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>What changed from the proposal</h3>
+
+                <div class="tbl">
+                    <table>
+                        <tr>
+                            <th>Proposal said</th>
+                            <th>What was done</th>
+                            <th>Why</th>
+                        </tr>
+                        <tr>
+                            <td>Sobel at T = 60</td>
+                            <td>19 density-matched thresholds and ODS</td>
+                            <td>T = 60 marks half of every image as edge on the 0–1530 scale</td>
+                        </tr>
+                        <tr>
+                            <td>Sobel on smoothed input</td>
+                            <td>Both raw and 3×3-binomial-smoothed sweeps; the paper reports raw</td>
+                            <td>The smoothing was not specified. Smoothed: safe PSNR 38.8 dB, τ(PSNR, F) = 0.16</td>
+                        </tr>
+                        <tr>
+                            <td>CSD on the operators</td>
+                            <td>CSD on the Gaussian and the DCT only</td>
+                            <td>Sobel's taps are already 1-digit CSD</td>
+                        </tr>
+                        <tr>
+                            <td>Morphology: count, Euler number, Hausdorff</td>
+                            <td>All three computed; the paper uses count and topology. Persistence diagrams also
+                                tried</td>
+                            <td>Bottleneck distance saturates at one gray level; Wasserstein is only marginally better than
+                                PSNR (τ 0.88–0.93 against 0.86–0.91)</td>
+                        </tr>
+                        <tr>
+                            <td>Otsu: threshold drift, misclassification</td>
+                            <td>Both computed; the main finding is that topology changes while the Otsu threshold stays the
+                                same</td>
+                            <td><code>trn2</code> at 72.4 dB changes 8% of images, <code>trn4</code> at 63.9 dB 44%</td>
+                        </tr>
+                        <tr>
+                            <td>LOA and DRUM as reference circuits</td>
+                            <td>Characterised in simulation, not swept</td>
+                            <td>EvoApproxLib gave enough circuits with C models and Verilog</td>
+                        </tr>
+                        <tr>
+                            <td>8–12 hardware design points</td>
+                            <td>257, all bit-exact and routed</td>
+                            <td>The automated flow made the full sweep affordable</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="box note">
+                    <span class="tag">Note</span>
+                    <p>A viva usually asks what you did yourself. Agree with the rest of the team beforehand how you
+                        describe the split of the work.</p>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch12">
+                <div class="ch-num">Chapter 12</div>
+                <h2>Questions to practise</h2>
+
+                <p>Answer out loud first, then open the answer. The numbers come from the project. The wording is a
+                    suggestion: put it in your own words.</p>
+
+                <h3>The idea</h3>
+                <ul class="qa">
+                    <li><details><summary>What is the difference between field-valued and decision-valued
+                                outputs?</summary><span class="a">A field-valued output is a signal used as a signal, like
+                                a smoothed image: a small error gives a small change. A decision-valued output is a
+                                yes/no or a label per pixel: a small error does nothing unless it crosses the threshold,
+                                and then the decision flips completely.</span></details></li>
+                    <li><details><summary>So does PSNR lie?</summary><span class="a">Not in ranking: it orders designs
+                                roughly right for most tasks. It misleads when one fixed number is used to accept designs.
+                                The number needed ranges from 29 to 66 dB depending on the task, and it changes with the
+                                use of the circuit and with the images.</span></details></li>
+                    <li><details><summary>Why include field-valued controls?</summary><span class="a">To check that any
+                                failure is specific to decision-valued tasks. It was not: 30 dB also accepted bad designs
+                                for denoising and compression. That changed the claim to "the threshold is
+                                uncalibrated", and gave the contrast that the field-valued threshold can be computed
+                                (Eq. 1) while the decision-valued one cannot.</span></details></li>
+                </ul>
+
+                <h3>Method</h3>
+                <ul class="qa">
+                    <li><details><summary>What exactly is "safe"?</summary><span class="a">The 95% bootstrap interval of
+                                the design's task change lies entirely above −δ: with 95% confidence the design loses less
+                                than the margin.</span></details></li>
+                    <li><details><summary>Why a bootstrap and not a t-test?</summary><span class="a">The task metrics (F
+                                at ODS, BD-rate, count errors) are not normally distributed, and some are dataset-level
+                                numbers: ODS F needs the whole set. A bootstrap over images works for any statistic and is
+                                paired.</span></details></li>
+                    <li><details><summary>Why fix the margins before the data?</summary><span class="a">Otherwise the
+                                margins can be chosen to make the result look good. For Harris that was not done, so
+                                Harris is called exploratory.</span></details></li>
+                    <li><details><summary>Why the full-scale peak?</summary><span class="a">PSNR compares the error with
+                                the range the signal can take. Sobel's magnitude reaches 1530. Using 255 understates its
+                                PSNR by 15.56 dB. The ranking does not change, but every threshold comparison
+                                does.</span></details></li>
+                    <li><details><summary>Why re-tune the threshold per design?</summary><span class="a">In practice the
+                                designer sets T for their own hardware. A design that adds a bias to M behaves like a
+                                different threshold, and re-tuning removes that. The fixed-threshold result is reported
+                                too.</span></details></li>
+                    <li><details><summary>Why match edge densities instead of using the same T values?</summary><span
+                                class="a">A biased design shifts M, so the same T gives a different edge density. Matching
+                                densities compares designs at the same operating point.</span></details></li>
+                    <li><details><summary>Why 50 images? Is that enough?</summary><span class="a">It gives intervals narrow
+                                enough to classify most designs, and BSDS matching is expensive (about 165 s per image for
+                                6 maps, and every design needs 19 thresholds on every image). Everything was then repeated
+                                on 50 more images with the same picture.</span></details></li>
+                    <li><details><summary>How is the Harris response computed in the hardware?</summary><span
+                                class="a">Gradients as in Sobel, then the products \(A = I_x^2\), \(B = I_y^2\),
+                                \(C = I_xI_y\), smoothed with a [1 2 1] binomial, then
+                                \(R = 2^{KK}(\det - k\,\mathrm{tr}^2)\) with \(k = KN/2^{KK}\) as integers, then 3×3
+                                non-maximum suppression.</span></details></li>
+                    <li><details><summary>Why is the segmentation PSNR measured on the Gaussian output?</summary><span
+                                class="a">The question is whether a designer who checks the Gaussian with PSNR would accept
+                                the circuit for segmentation. The PSNR is of the circuit's own output; the task is
+                                downstream.</span></details></li>
+                </ul>
+
+                <h3>Results</h3>
+                <ul class="qa">
+                    <li><details><summary>Explain Eq. 1.</summary><span class="a">Unrelated errors add in mean square.
+                                The denoising loss is \(10\log_{10}(1 + \mathrm{MSE}_e/\mathrm{MSE}_{dn})\). Set it to δ
+                                and solve for the PSNR of the approximation. With 26.7 dB and δ = 0.1 dB this gives
+                                43.0 dB.</span></details></li>
+                    <li><details><summary>Why is the Sobel safe PSNR so low compared with segmentation?</summary><span
+                                class="a">Re-tuning the threshold absorbs much of Sobel's error (truncating M is exactly a
+                                threshold shift), and F against human labels is insensitive: 74 of 100 designs change it
+                                by less than 0.001. Segmentation counts regions, and one flipped pixel can split a region,
+                                so it needs a very high PSNR.</span></details></li>
+                    <li><details><summary>What does "accepted with probability 0.56 on a single image"
+                                mean?</summary><span class="a">The 63.9 dB design changes the topology of 44% of the
+                                images. Test it on one random image and 56% of the time you see no change and accept
+                                it.</span></details></li>
+                    <li><details><summary>Why does near-threshold mass predict fragility?</summary><span class="a">A
+                                one-level error can only flip pixels within one level of the threshold. Images with many
+                                such pixels have more pixels that can flip.</span></details></li>
+                    <li><details><summary>Why does a calibrated threshold not transfer across design
+                                families?</summary><span class="a">Each family has its own error shape. The quantised
+                                Gaussians jump from 30.6 to 51.2 dB with nothing in between, so the threshold they give
+                                (30.6 dB) is far too low for library circuits, whose errors at the same PSNR do more
+                                harm.</span></details></li>
+                </ul>
+
+                <h3>Hardware</h3>
+                <ul class="qa">
+                    <li><details><summary>What does bit-exact mean, and how was it checked?</summary><span class="a">The
+                                HLS kernel and the Python reference give exactly the same output bits on the same input.
+                                Golden vectors from Python were compared in C simulation and in RTL co-simulation, for all
+                                257 designs.</span></details></li>
+                    <li><details><summary>Why do approximate adders not save area on an FPGA?</summary><span class="a">The
+                                FPGA's carry chains make exact addition very cheap. The library circuits are gate-level
+                                ASIC designs mapped onto general LUTs. 47 of 78 swaps cost more LUTs than
+                                exact.</span></details></li>
+                    <li><details><summary>What is II = 1?</summary><span class="a">An initiation interval of 1: the
+                                pipeline accepts a new pixel every clock cycle.</span></details></li>
+                    <li><details><summary>Why not trust the HLS report?</summary><span class="a">C synthesis overestimated
+                                LUTs about 4×, and once reported II = 1 for an Otsu design that failed timing after place
+                                and route. Only post-route numbers are reported.</span></details></li>
+                    <li><details><summary>How was power measured?</summary><span class="a">The routed netlist was
+                                simulated on real images, its outputs checked against RTL co-simulation, and the switching
+                                activity saved as SAIF and given to Vivado's power analysis. Only dynamic power is
+                                compared, because static power is the same for all designs.</span></details></li>
+                    <li><details><summary>Why is the Sobel saving so small (about 7%)?</summary><span class="a">About 70%
+                                of the Sobel kernel's LUTs are streaming infrastructure (line buffers, window, control),
+                                which approximation does not touch.</span></details></li>
+                </ul>
+
+                <h3>The process</h3>
+                <ul class="qa">
+                    <li><details><summary>What was the biggest mistake found in the project's own work?</summary><span
+                                class="a">The Sobel PSNR peak. It turned a headline ("30 dB rejects 44 good Sobel
+                                designs") into an artefact. It was corrected, and the result that survived is that 30 dB
+                                accepts shown-inferior designs in 4 of 5 tasks.</span></details></li>
+                </ul>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="ch" id="ch13">
+                <div class="ch-num">Chapter 13</div>
+                <h2>Glossary</h2>
+
+                <div class="tbl">
+                    <table>
+                        <tr>
+                            <th>Term</th>
+                            <th>Meaning</th>
+                        </tr>
+                        <tr><td>Approximate computing</td><td>Making arithmetic cheaper by allowing small errors</td></tr>
+                        <tr><td>ASIC</td><td>A custom chip. EvoApproxLib's area and power numbers are for a 45 nm ASIC process</td></tr>
+                        <tr><td>BD-rate</td><td>Average % of extra bits for the same quality between two rate–distortion curves</td></tr>
+                        <tr><td>Bias</td><td>The mean signed error. Library metrics ignore it</td></tr>
+                        <tr><td>Bit-exact</td><td>Two implementations give exactly the same output bits</td></tr>
+                        <tr><td>Bootstrap</td><td>Resampling the images with replacement to get a confidence interval</td></tr>
+                        <tr><td>BRAM</td><td>FPGA block RAM, used for the line buffers</td></tr>
+                        <tr><td>BSDS500</td><td>Berkeley segmentation dataset, with human-drawn boundaries</td></tr>
+                        <tr><td>CARRY4</td><td>The FPGA's dedicated carry-chain cell, which makes exact adders cheap</td></tr>
+                        <tr><td>cosim</td><td>RTL co-simulation: the generated hardware is simulated with the C testbench</td></tr>
+                        <tr><td>CSD</td><td>Canonical signed digit: digits −1, 0, +1, no two adjacent nonzero</td></tr>
+                        <tr><td>csim</td><td>C simulation of the HLS code</td></tr>
+                        <tr><td>csynth</td><td>HLS synthesis from C to RTL. Its resource numbers are estimates</td></tr>
+                        <tr><td>DSP</td><td>FPGA multiplier block</td></tr>
+                        <tr><td>Euler number</td><td>Number of components minus number of holes</td></tr>
+                        <tr><td>EvoApproxLib</td><td>A library of evolved approximate adders and multipliers</td></tr>
+                        <tr><td>FF</td><td>Flip-flop</td></tr>
+                        <tr><td>FOM</td><td>Pratt's figure of merit: how close detected edges are to reference edges</td></tr>
+                        <tr><td>HLS</td><td>High-level synthesis: C++ to hardware</td></tr>
+                        <tr><td>II</td><td>Initiation interval: clock cycles between new inputs</td></tr>
+                        <tr><td>Kendall τ</td><td>Rank agreement, from −1 to +1</td></tr>
+                        <tr><td>Line buffer</td><td>Memory holding the last rows of the image for a sliding window</td></tr>
+                        <tr><td>LUT</td><td>Look-up table, the FPGA's basic logic cell, and the main cost unit here</td></tr>
+                        <tr><td>MAE, WCE, EP</td><td>Mean absolute error, worst-case error and error probability of a circuit</td></tr>
+                        <tr><td>Margin δ</td><td>The largest task loss that is accepted</td></tr>
+                        <tr><td>Non-inferiority</td><td>Showing that a design is not worse by more than δ</td></tr>
+                        <tr><td>ODS / OIS</td><td>Best threshold for the whole dataset / for each image</td></tr>
+                        <tr><td>Otsu</td><td>The threshold that best splits a histogram into two classes</td></tr>
+                        <tr><td>Post-route</td><td>After Vivado placement and routing: real resource and timing numbers</td></tr>
+                        <tr><td>PSNR</td><td>\(10\log_{10}(\text{peak}^2/\mathrm{MSE})\)</td></tr>
+                        <tr><td>Repeatability</td><td>Share of corners found again under a known transform</td></tr>
+                        <tr><td>Safe PSNR</td><td>Highest PSNR of a design that is not safe for the task</td></tr>
+                        <tr><td>SAIF</td><td>Switching activity file, used for accurate power</td></tr>
+                        <tr><td>Slot</td><td>A group of adders that all get the same approximate circuit</td></tr>
+                        <tr><td>SSIM</td><td>Structural similarity index</td></tr>
+                        <tr><td>Truncation / rounding</td><td>Dropping low bits, downward or to the nearest value</td></tr>
+                    </table>
+                </div>
+
+                <div class="box warn" style="margin-top:36px;">
+                    <span class="tag">Disclaimer</span>
+                    <p>Claude wrote this guide from the project's notes and results, so treat it as notes and not as the
+                        paper. Any mistake here is the model's. Check anything important against the project files.</p>
+                </div>
+            </section>
+        </article>
+    </div>
+
+    <script src="../assets/theme.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.7/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.7/dist/contrib/auto-render.min.js"
+        crossorigin="anonymous"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false,strict:false});"></script>
+    <script src="data.js"></script>
+    <script src="figures.js"></script>
+    <script>
+        /* Table of contents: highlight the current chapter, track progress, toggle on small screens. */
+        (function () {
+            var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc ol a'));
+            var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+            var bar = document.getElementById('progress');
+            var toc = document.getElementById('toc');
+            var toggle = document.getElementById('tocToggle');
+
+            function update() {
+                var y = window.scrollY + window.innerHeight * 0.3;
+                var idx = 0;
+                for (var i = 0; i < sections.length; i++) {
+                    if (sections[i] && sections[i].offsetTop <= y) idx = i;
+                }
+                links.forEach(function (a, i) { a.classList.toggle('active', i === idx); });
+                if (bar) {
+                    var max = document.documentElement.scrollHeight - window.innerHeight;
+                    bar.style.width = (max > 0 ? Math.min(100, 100 * window.scrollY / max) : 0) + '%';
+                }
+            }
+            window.addEventListener('scroll', update, { passive: true });
+            window.addEventListener('resize', update);
+            update();
+
+            /* Hiding the chapter list gives the text the full width. The
+               choice is remembered, like the theme. */
+            var hide = document.getElementById('tocHide');
+            var show = document.getElementById('tocShow');
+
+            function setHidden(off) {
+                document.body.classList.toggle('toc-off', off);
+                try {
+                    if (off) localStorage.setItem('psnr-toc', 'off');
+                    else localStorage.removeItem('psnr-toc');
+                } catch (e) { }
+                update();
+            }
+
+            try { if (localStorage.getItem('psnr-toc') === 'off') document.body.classList.add('toc-off'); } catch (e) { }
+
+            if (hide) hide.addEventListener('click', function () { setHidden(true); show.focus(); });
+            if (show) show.addEventListener('click', function () { setHidden(false); hide.focus(); });
+
+            if (toggle) {
+                toggle.addEventListener('click', function () {
+                    var open = toc.classList.toggle('open');
+                    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                });
+                links.forEach(function (a) {
+                    a.addEventListener('click', function () {
+                        toc.classList.remove('open');
+                        toggle.setAttribute('aria-expanded', 'false');
+                    });
+                });
+            }
+        })();
+    </script>
+</body>
+
+</html>
